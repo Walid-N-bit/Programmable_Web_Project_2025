@@ -10,7 +10,7 @@ class GigworkTests(TestCase):
         week_ago = datetime.now().date() - timedelta(days=7)
         week_ahead = datetime.now().date() + timedelta(days=7)
         now = datetime.now().date()
-                
+
         # Create Customers
         customer1 = Customer.objects.create(
             first_name="Customer One",
