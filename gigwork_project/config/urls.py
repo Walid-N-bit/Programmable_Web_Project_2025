@@ -22,8 +22,7 @@ from rest_framework import routers
 from gigwork import views
 
 router = routers.DefaultRouter()
-router.register(r'customers', views.CustomerViewSet)
-router.register(r'employees', views.EmployeeViewSet)
+router.register(r'users', views.UserViewSet)
 router.register(r'gigs', views.GigViewSet)
 router.register(r'postings', views.PostingViewSet)
 

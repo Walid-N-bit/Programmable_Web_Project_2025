@@ -1,15 +1,10 @@
-from gigwork.models import Employee, Customer, Gig, Posting
+from gigwork.models import User, Gig, Posting
 from rest_framework import serializers
 
-class CustomerSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Customer
-        fields = ['first_name', 'last_name', 'email', 'phone_number', 'address']
-
-class EmployeeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Employee
-        fields = ['first_name', 'last_name', 'email', 'phone_number']
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'address', 'role']
 
 class GigSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

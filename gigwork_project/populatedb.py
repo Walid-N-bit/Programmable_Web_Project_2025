@@ -1,12 +1,12 @@
 import os
+
 import django
-from gigwork.models import Customer, Employee, Posting, Gig
+# Set up Django environment
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  
+django.setup()
+from gigwork.models import User, Posting, Gig
 from datetime import datetime, timedelta
 
-
-# Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gigwork_app.settings")
-django.setup()
 
 
 def populate_db():
@@ -16,40 +16,46 @@ def populate_db():
     now = datetime.now().date()
 
     # Create Customers
-    customer1 = Customer.objects.create(
-        first_name="Customer One",
-        last_name="Customer One",
+    user1 = User.objects.create(
+        first_name="User One",
+        last_name="User One",
         email="customer1@asd.com",
         phone_number="1234567890",
         address="Testitie 12, 90500 Oulu",
+        role="customer",
+
     )
-    customer2 = Customer.objects.create(
-        first_name="Customer Two",
-        last_name="Customer Two",
+    user2 = User.objects.create(
+        first_name="User Two",
+        last_name="User Two",
         email="customer2@asd.com",
         phone_number="0987654321",
         address="Testitie 13, 90520 Oulu",
+        role="customer",
+
     )
 
     # Create Employees
-    employee1 = Employee.objects.create(
-        first_name="Employee One",
-        last_name="Employee One",
+    user3 = User.objects.create(
+        first_name="User three",
+        last_name="user three",
         email="employee1@asd.com",
         phone_number="1234567890",
+        role="employee",
     )
-    employee2 = Employee.objects.create(
-        first_name="Employee Two",
-        last_name="Employee Two",
+    user4 = User.objects.create(
+        first_name="user four",
+        last_name="user four",
         email="employee2@asd.com",
         phone_number="0987654321",
+        role="employee",
     )
 
     # Create Postings
     posting1 = Posting.objects.create(
         title="Posting One",
         description="Hey you, you're finally awake.",
-        customer=customer1,
+        user=user1,
         expires_at=week_ahead,
         price=100.00,
         status="open",
@@ -57,7 +63,7 @@ def populate_db():
     posting2 = Posting.objects.create(
         title="Posting Two",
         description="You were trying to cross the border, right?",
-        customer=customer2,
+        user=user2,
         expires_at=week_ago,
         price=200.00,
         status="expired",
@@ -65,7 +71,7 @@ def populate_db():
     posting3 = Posting.objects.create(
         title="Posting Three",
         description="Walked right into that Imperial ambush, same as us, and that thief over there.",
-        customer=customer1,
+        user=user3,
         expires_at=week_ahead,
         price=300.00,
         status="accepted",
@@ -75,8 +81,7 @@ def populate_db():
     gig1 = Gig.objects.create(
         title="Gig One",
         description="For the Emperor!",
-        customer=customer1,
-        employee=employee1,
+        user=user1,
         start_date=week_ago,
         end_date=now,
         price=100.00,
@@ -85,8 +90,7 @@ def populate_db():
     gig2 = Gig.objects.create(
         title="Gig Two",
         description="Damn you Stormcloaks. Skyrim was fine until you came along.",
-        customer=customer2,
-        employee=employee2,
+        user=user2,
         start_date=week_ago,
         end_date=week_ahead,
         price=200.00,
