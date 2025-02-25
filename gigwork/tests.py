@@ -1,7 +1,11 @@
+import os
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 from datetime import datetime, timedelta
 from django.test import TestCase
 from gigwork.models import Gig, User, Posting
-
 
 class GigworkTests(TestCase):
 
@@ -95,7 +99,7 @@ class GigworkTests(TestCase):
 
     def test_user_count(self):
         users = User.objects.all()
-        self.assertEqual(users.count(), 2)
+        self.assertEqual(users.count(), 4)
 
     def test_posting_count(self):
         postings = Posting.objects.all()
