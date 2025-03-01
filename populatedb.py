@@ -1,9 +1,9 @@
 import os
-
 import django
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  
 django.setup()
+
 from gigwork.models import User, Posting, Gig
 from datetime import datetime, timedelta
 
@@ -17,8 +17,8 @@ def populate_db():
 
     # Create Customers
     user1 = User.objects.create(
-        first_name="User One",
-        last_name="User One",
+        first_name="John",
+        last_name="Wick",
         email="customer1@asd.com",
         phone_number="1234567890",
         address="Testitie 12, 90500 Oulu",
@@ -26,8 +26,8 @@ def populate_db():
 
     )
     user2 = User.objects.create(
-        first_name="User Two",
-        last_name="User Two",
+        first_name="John",
+        last_name="117",
         email="customer2@asd.com",
         phone_number="0987654321",
         address="Testitie 13, 90520 Oulu",
@@ -37,15 +37,15 @@ def populate_db():
 
     # Create Employees
     user3 = User.objects.create(
-        first_name="User three",
-        last_name="user three",
+        first_name="Edward",
+        last_name="Elric",
         email="employee1@asd.com",
         phone_number="1234567890",
         role="employee",
     )
     user4 = User.objects.create(
-        first_name="user four",
-        last_name="user four",
+        first_name="Alphonse",
+        last_name="Elric",
         email="employee2@asd.com",
         phone_number="0987654321",
         role="employee",
