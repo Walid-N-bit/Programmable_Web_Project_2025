@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-6f&70=xk+)89xgu96^9iy5mv&r__4hdr01l6g)%2bqjy0bckha
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['testserver']
 
 
 # Application definition
@@ -127,7 +127,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Defuault renderer classes
 # https://www.django-rest-framework.org/api-guide/renderers/
-"""REST_FRAMEWORK = {
+REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
@@ -140,6 +140,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-}"""
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
 
 AUTH_USER_MODEL = 'gigwork.User'

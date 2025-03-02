@@ -1,6 +1,9 @@
 """
 This module contains viewsets for the API. Viewsets in Django are called "resources"
-in other frameworks. They provide actions to execute GEt, POST, PUT, DELETE, PATCH requests. 
+in other frameworks. They provide actions to execute GEt, POST, PUT, DELETE, PATCH requests.
+
+Source for the general structure of the module:
+https://www.django-rest-framework.org/tutorial/quickstart/#views
 """
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import permissions, viewsets, status
@@ -24,6 +27,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
+        """
+        The purpose of this method is to allow for creating new users without
+        being blocked by the authentication and permission schemes.
+        """
         if self.action == 'new_user':
             permission_classes = []
         else:
@@ -34,7 +41,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def new_user(self, request):
         """
-        create new user, return authentication token for that user
+        create new user, return authentication token for that user.
+        data is sent from the client in json format, required fields are: first_name,
+        last_name, email.
         """
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -47,15 +56,10 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def filter_users(self, request):
         """
-        query users by fields
+        query users by fields. e.g: /filter_users/?first_name=John&role=customer
         """
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'address', 'role']
-        user_list = User.objects.all()
-        for field in fields:
-            f = request.query_params.get(field)
-            if f is not None:
-                kwags = {field: f}
-                user_list = user_list.filter(**kwags)
+        user_list = FilterByField(request, fields, User.objects.all())
         serialized = UserSerializer(user_list, many=True)
         return JsonResponse(serialized.data, safe=False)
 
@@ -77,12 +81,7 @@ class GigViewSet(viewsets.ModelViewSet):
         query gigs by fields
         """
         fields = ['title', 'description', 'user', 'start_date', 'end_date', 'price', 'status']
-        gig_list = Gig.objects.all()
-        for field in fields:
-            f = request.query_params.get(field)
-            if f is not None:
-                kwags = {field: f}
-                gig_list = gig_list.filter(**kwags)
+        gig_list = FilterByField(request, fields, Gig.objects.all())
         serialized = UserSerializer(gig_list, many=True)
         return JsonResponse(serialized.data, safe=False)
 
@@ -104,11 +103,18 @@ class PostingViewSet(viewsets.ModelViewSet):
         query postings by fields
         """
         fields = ['title', 'description', 'user', 'created_at', 'expires_at', 'price', 'status']
-        posting_list = Gig.objects.all()
-        for field in fields:
-            f = request.query_params.get(field)
-            if f is not None:
-                kwags = {field: f}
-                posting_list = posting_list.filter(**kwags)
+        posting_list = FilterByField(request, fields, Posting.objects.all())
         serialized = UserSerializer(posting_list, many=True)
         return JsonResponse(serialized.data, safe=False)
+
+def FilterByField(request, fields, filter_list):
+    """
+    this function filters a list using every field in the query paramters and returns a list that
+    satisfies the query parameters provided.
+    """
+    for field in fields:
+        value = request.query_params.get(field)
+        if value is not None:
+            kwags = {field: value}
+            filter_list = filter_list.filter(**kwags)
+    return filter_list
