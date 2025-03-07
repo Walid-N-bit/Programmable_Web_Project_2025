@@ -56,7 +56,8 @@ class GigTests(APITestCase):
             }
     response = self.client.post(url, data, format='json')
     print(response.status_code)
-    print(response.content)
+    #print(response.content)
+    #print(response)
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
   def test_gigs_update(self):

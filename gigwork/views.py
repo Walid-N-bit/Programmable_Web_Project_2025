@@ -76,7 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
         data is sent from the client in json format, required fields are: first_name,
         last_name, email.
         """
-        if request.content_type is not 'application/json':
+        if request.content_type != 'application/json':
             raise UnsupportedMediaType
         try:
             validate(request.data, UserViewSet.json_schema())
@@ -111,10 +111,10 @@ class GigViewSet(viewsets.ModelViewSet):
     """
     queryset = Gig.objects.all().order_by('status')
     serializer_class = GigSerializer
-    """authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]"""
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    #authentication_classes = []
+    #permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -153,7 +153,7 @@ class GigViewSet(viewsets.ModelViewSet):
         return JsonResponse(serializer.data, safe=False)
         
     def create(self, request):
-        if request.content_type is not 'application/json':
+        if request.content_type != 'application/json':
             raise UnsupportedMediaType
         try:            
             validate(request.data, GigViewSet.json_schema())
@@ -170,6 +170,8 @@ class GigViewSet(viewsets.ModelViewSet):
             return JsonResponse({"result":"Data not valid"}, status=status.HTTP_400_BAD_REQUEST)
         
     def update(self, request, pk=None):
+        if request.content_type != 'application/json':
+            raise UnsupportedMediaType
         try:            
             validate(request.data, GigViewSet.json_schema())
         except ValidationError as e:
@@ -205,10 +207,10 @@ class PostingViewSet(viewsets.ModelViewSet):
     """
     queryset = Posting.objects.all().order_by('status')
     serializer_class = PostingSerializer
-    #authentication_classes = [TokenAuthentication]
-    #permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    #authentication_classes = []
+    #permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -242,7 +244,7 @@ class PostingViewSet(viewsets.ModelViewSet):
         return schema
 
     def create(self, request):
-        if request.content_type is not 'application/json':
+        if request.content_type != 'application/json':
             raise UnsupportedMediaType
         try:            
             validate(request.data, PostingViewSet.json_schema())
@@ -259,6 +261,8 @@ class PostingViewSet(viewsets.ModelViewSet):
             return JsonResponse({}, status=status.HTTP_400_BAD_REQUEST)
         
     def update(self, request, pk=None):
+        if request.content_type != 'application/json':
+            raise UnsupportedMediaType
         try:            
             validate(request.data, PostingViewSet.json_schema())
         except ValidationError as e:

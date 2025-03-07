@@ -43,20 +43,21 @@ class PostingTests(APITestCase):
     print(response.status_code)
   
   def test_posting_create(self):
-    url = f"/gigwork/api/postings/{self.posting.id}/"
+    url = "/gigwork/api/postings/"
     end_date=datetime.now().date() + timedelta(days=7)
     data = {
             "title": "postest",
             "description": "This is a description",
             "expires_at": end_date,
             "price": 100.00,
-            "status": "accepted",
+            "status": "open",
             "user":self.user.id,
             }
 
-    response = self.client.put(url, data, format='json')
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    response = self.client.post(url, data, format='json')
+    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     print(response.status_code)
+    #print(response)
 
   def test_posting_update(self):
     url = f"/gigwork/api/postings/{self.posting.id}/"
