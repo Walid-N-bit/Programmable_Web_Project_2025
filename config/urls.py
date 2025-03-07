@@ -27,5 +27,9 @@ router.register(r'postings', views.PostingViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('gigwork/api/', include(router.urls)),
+    path('', include(router.urls)),
+    #path('test/<int:param>/', views.test),
+    #path('users/<str:field>/<str:value>/', views.UserViewSet.get_users_by_field),
+    #path('gigs/<str:field>/<str:str>/', views.GigViewSet.get_gigs_by_field),
+    #path('postings/<str:field>/<str:str>/', views.PostingViewSet.get_postings_by_field),
     ]

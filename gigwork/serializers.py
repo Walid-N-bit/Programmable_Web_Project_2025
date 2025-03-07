@@ -1,6 +1,9 @@
 """
 This module converts djando model instances into Python
 data types. 
+
+Source for the general structure of the module:
+https://www.django-rest-framework.org/tutorial/quickstart/#serializers
 """
 
 from rest_framework import serializers
@@ -24,6 +27,8 @@ class GigSerializer(serializers.ModelSerializer):
     """
     convert 'Gig' model into a python dictionary
     """
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
     class Meta:
         """
         this inner class specifies the model associated with the serializer
@@ -35,6 +40,8 @@ class PostingSerializer(serializers.ModelSerializer):
     """
     convert 'Posting' model into a python dictionary
     """
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
     class Meta:
         """
         this inner class specifies the model associated with the serializer
