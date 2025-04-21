@@ -1,0 +1,763 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /gigwork/api/gigs/:
+    get:
+      operationId: gigwork_api_gigs_list
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      parameters:
+      - in: query
+        name: description
+        schema:
+          type: string
+      - in: query
+        name: end_date
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: price
+        schema:
+          type: number
+      - in: query
+        name: start_date
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - completed
+          - in_progress
+          - pending
+        description: |-
+          * `pending` - Pending
+          * `in_progress` - In Progress
+          * `completed` - Completed
+      - in: query
+        name: title
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: integer
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Gig'
+          description: ''
+    post:
+      operationId: gigwork_api_gigs_create
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gig'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gig'
+          description: ''
+  /gigwork/api/gigs/{id}/:
+    get:
+      operationId: gigwork_api_gigs_retrieve
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this gig.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gig'
+          description: ''
+    put:
+      operationId: gigwork_api_gigs_update
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this gig.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gig'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gig'
+          description: ''
+    patch:
+      operationId: gigwork_api_gigs_partial_update
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this gig.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGig'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gig'
+          description: ''
+    delete:
+      operationId: gigwork_api_gigs_destroy
+      description: |-
+        API endpoint to view and edit gigs
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_gigs': allows for querying gigs by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this gig.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '204':
+          description: No response body
+  /gigwork/api/postings/:
+    get:
+      operationId: gigwork_api_postings_list
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      parameters:
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: description
+        schema:
+          type: string
+      - in: query
+        name: expires_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: price
+        schema:
+          type: number
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - expired
+          - open
+        description: |-
+          * `open` - Open
+          * `expired` - Expired
+          * `accepted` - Accepted
+      - in: query
+        name: title
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: integer
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Posting'
+          description: ''
+    post:
+      operationId: gigwork_api_postings_create
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posting'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posting'
+          description: ''
+  /gigwork/api/postings/{id}/:
+    get:
+      operationId: gigwork_api_postings_retrieve
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this posting.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posting'
+          description: ''
+    put:
+      operationId: gigwork_api_postings_update
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this posting.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posting'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posting'
+          description: ''
+    patch:
+      operationId: gigwork_api_postings_partial_update
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this posting.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPosting'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posting'
+          description: ''
+    delete:
+      operationId: gigwork_api_postings_destroy
+      description: |-
+        API endpoint to view and edit postings
+        this viewset provides default actions inherited from 'ModelViewset',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides a custom action:
+        'filter_postings': allows for querying postings by fields.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this posting.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '204':
+          description: No response body
+  /gigwork/api/users/:
+    get:
+      operationId: gigwork_api_users_list
+      description: |-
+        API endpoint to view and edit users
+        this viewset provides default actions inherited from 'ModelViewSet',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides two custom actions. These are:
+        'new_user', 'filter_users'
+      parameters:
+      - in: query
+        name: address
+        schema:
+          type: string
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: first_name
+        schema:
+          type: string
+      - in: query
+        name: id
+        schema:
+          type: integer
+      - in: query
+        name: last_name
+        schema:
+          type: string
+      - in: query
+        name: phone_number
+        schema:
+          type: string
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - customer
+          - employee
+        description: |-
+          * `customer` - Customer
+          * `employee` - Employee
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: gigwork_api_users_create
+      description: |-
+        create new user, return authentication token for that user.
+        data is sent from the client in json format, required fields are: first_name,
+        last_name, email.
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /gigwork/api/users/{id}/:
+    get:
+      operationId: gigwork_api_users_retrieve
+      description: |-
+        API endpoint to view and edit users
+        this viewset provides default actions inherited from 'ModelViewSet',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides two custom actions. These are:
+        'new_user', 'filter_users'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: gigwork_api_users_update
+      description: |-
+        API endpoint to view and edit users
+        this viewset provides default actions inherited from 'ModelViewSet',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides two custom actions. These are:
+        'new_user', 'filter_users'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: gigwork_api_users_partial_update
+      description: |-
+        API endpoint to view and edit users
+        this viewset provides default actions inherited from 'ModelViewSet',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides two custom actions. These are:
+        'new_user', 'filter_users'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - gigwork
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: gigwork_api_users_destroy
+      description: |-
+        API endpoint to view and edit users
+        this viewset provides default actions inherited from 'ModelViewSet',
+        theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
+        the viewset also provides two custom actions. These are:
+        'new_user', 'filter_users'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - gigwork
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Gig:
+      type: object
+      description: convert 'Gig' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        user:
+          type: integer
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/GigStatusEnum'
+      required:
+      - description
+      - id
+      - price
+      - start_date
+      - status
+      - title
+      - user
+    GigStatusEnum:
+      enum:
+      - pending
+      - in_progress
+      - completed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `in_progress` - In Progress
+        * `completed` - Completed
+    PatchedGig:
+      type: object
+      description: convert 'Gig' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        user:
+          type: integer
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/GigStatusEnum'
+    PatchedPosting:
+      type: object
+      description: convert 'Posting' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        user:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/PostingStatusEnum'
+    PatchedUser:
+      type: object
+      description: convert 'User' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+        address:
+          type: string
+        role:
+          type: string
+    Posting:
+      type: object
+      description: convert 'Posting' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        user:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/PostingStatusEnum'
+      required:
+      - created_at
+      - description
+      - id
+      - price
+      - title
+      - user
+    PostingStatusEnum:
+      enum:
+      - open
+      - expired
+      - accepted
+      type: string
+      description: |-
+        * `open` - Open
+        * `expired` - Expired
+        * `accepted` - Accepted
+    User:
+      type: object
+      description: convert 'User' model into a python dictionary
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+        address:
+          type: string
+        role:
+          type: string
+      required:
+      - email
+      - first_name
+      - id
+      - last_name

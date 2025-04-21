@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     "gigwork",
     "rest_framework",
     'rest_framework.authtoken',
+    'django_filters',
+    'drf_spectacular',
+
 ]
 
 MIDDLEWARE = [
@@ -141,6 +144,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    
 }
 
 AUTH_USER_MODEL = 'gigwork.User'

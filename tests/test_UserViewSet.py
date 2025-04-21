@@ -27,7 +27,7 @@ class UserTests(APITestCase):
     response = self.client.post(url, data, format='json')
     print(response.status_code)
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    
+  
   def test_users(self):
     url = "/gigwork/api/users/"
     response = self.client.get(url)
@@ -53,4 +53,18 @@ class UserTests(APITestCase):
     response = self.client.delete(url)
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     print(response.status_code)
-    
+
+  def test_new_user_parse_error(self):
+    url = "/gigwork/api/users/new_user/"
+    data = {"first_name":"new_fn", "email":"new@testmail.com"}
+    response = self.client.post(url, data, format='json')
+    print(response.status_code)
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+  def test_new_user_unsupportedmediatype(self):
+    url = "/gigwork/api/users/new_user/"
+    data = {"first_name":"mm", "last_name":"new_ln2", "email":"new@testmail.com"}
+    response = self.client.post(url, data, format='')
+    print(response.status_code)
+    self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+  

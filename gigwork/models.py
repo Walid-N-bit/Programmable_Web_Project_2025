@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import datetime, timedelta
 from django.contrib.auth.models import AbstractUser
 
 
@@ -21,6 +22,25 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+class Posting(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        default=0  # Assuming user with ID 1 exists
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(
+        max_length=20,
+        choices=[("open", "Open"), ("expired", "Expired"), ("accepted", "Accepted")],
+        default= 'open',
+    )
+
+    def __str__(self):
+        return self.title
 
 class Gig(models.Model):
     title = models.CharField(max_length=100)
@@ -45,21 +65,4 @@ class Gig(models.Model):
     def __str__(self):
         return self.title
 
-class Posting(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        default=0  # Assuming user with ID 1 exists
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(
-        max_length=20,
-        choices=[("open", "Open"), ("expired", "Expired"), ("accepted", "Accepted")],
-    )
 
-    def __str__(self):
-        return self.title

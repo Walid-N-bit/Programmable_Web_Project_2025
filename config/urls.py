@@ -13,12 +13,16 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+
+Other sources:
+https://drf-spectacular.readthedocs.io/en/latest/readme.html
 """
 
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from gigwork import views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
@@ -28,6 +32,8 @@ router.register(r'postings', views.PostingViewSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('gigwork/api/', include(router.urls)),
+    path('gigwork/api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('gigwork/api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     #path('test/<int:param>/', views.test),
     #path('users/<str:field>/<str:value>/', views.UserViewSet.get_users_by_field),
     #path('gigs/<str:field>/<str:str>/', views.GigViewSet.get_gigs_by_field),
