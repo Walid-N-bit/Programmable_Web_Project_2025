@@ -7,6 +7,7 @@ https://www.django-rest-framework.org/tutorial/quickstart/#views
 https://www.django-rest-framework.org/api-guide/exceptions/#apiexception
 https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/#dynamic-schemas-static-methods
 https://www.django-rest-framework.org/api-guide/caching/
+https://docs.djangoproject.com/en/5.2/ref/urlresolvers/#reverse
 """
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -17,11 +18,13 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import UnsupportedMediaType, ParseError
+from rest_framework.reverse import reverse
 #from rest_framework.response import Response
 from django.http import JsonResponse
 from jsonschema import validate, ValidationError
 from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
 from gigwork.models import User, Gig, Posting
+from gigwork.masonbuilder import MasonBuilder
 
 class JsonSchemaMixin:
     def create(self, request):
@@ -45,8 +48,6 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     API endpoint to view and edit users
     this viewset provides default actions inherited from 'ModelViewSet',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
-    the viewset also provides two custom actions. These are:
-    'new_user', 'filter_users'
     """
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
@@ -99,12 +100,43 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
-        return super().list(request)
+
+        response = super().list(request)
+        body = MasonBuilder(items=[])
+        for user in response.data:
+            #return JsonResponse(user, safe=False)
+            item = MasonBuilder(user)
+            self_url = reverse('users-detail', kwargs={'pk': user['id']})
+            item.add_control("self", self_url)
+            body["items"].append(item)
+
+        body.add_control("self", request.build_absolute_uri())
+
+        body.add_control_post(ctrl_name='user: create',
+                               title='add a new user',
+                               href=request.build_absolute_uri(),
+                               schema=UserViewSet.json_schema()
+                               )
+    
+        return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
-        return super().retrieve(request, pk=None)
+        response = super().retrieve(request, pk=None)
+        body = MasonBuilder(response.data)
+        self_url = reverse('users-detail', kwargs={'pk': response.data['id']})
+
+        body.add_control("self", self_url)
+
+        body.add_control_put(title='update existing user',
+                             href=self_url,
+                             schema=UserViewSet.json_schema()
+                             )
+        body.add_control_delete(title='remove a user',
+                                href=self_url
+                                )
+        return JsonResponse(body)
 
     def create(self, request):
         """
@@ -123,8 +155,6 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     API endpoint to view and edit postings
     this viewset provides default actions inherited from 'ModelViewset',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
-    the viewset also provides a custom action:
-    'filter_postings': allows for querying postings by fields.
     """
     queryset = Posting.objects.all().order_by('status')
     serializer_class = PostingSerializer
@@ -172,12 +202,38 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
-        return super().list(request)
+        response = super().list(request)
+        body = MasonBuilder(items=[])
+        for posting in response.data:
+            item = MasonBuilder(posting)
+            self_url = reverse('postings-detail', kwargs={'pk': posting['id']})
+            item.add_control("self", self_url)
+            body["items"].append(item)
+
+        body.add_control("self", request.build_absolute_uri())
+
+        body.add_control_post(ctrl_name='posting: create',
+                               title='add a new posting',
+                               href=request.build_absolute_uri(),
+                               schema=PostingViewSet.json_schema()
+                               )
+        return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
-        return super().retrieve(request, pk=None)
+        response = super().retrieve(request, pk=None)
+        body = MasonBuilder(response.data)
+        self_url = reverse('postings-detail', kwargs={'pk': response.data['id']})
+        body.add_control("self", self_url)
+        body.add_control_put(title='update existing posting',
+                             href=self_url,
+                             schema=PostingViewSet.json_schema()
+                             )
+        body.add_control_delete(title='remove a posting',
+                                href=self_url
+                                )
+        return JsonResponse(body)
 
     def create(self, request):
         serializer = PostingSerializer(data= request.data)
@@ -199,8 +255,6 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     API endpoint to view and edit gigs
     this viewset provides default actions inherited from 'ModelViewset',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
-    the viewset also provides a custom action:
-    'filter_gigs': allows for querying gigs by fields.
     """
     queryset = Gig.objects.all().order_by('status')
     serializer_class = GigSerializer
@@ -248,12 +302,38 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
-        return super().list(request)
+        response = super().list(request)
+        body = MasonBuilder(items=[])
+        for gig in response.data:
+            item = MasonBuilder(gig)
+            self_url = reverse('gigs-detail', kwargs={'pk': gig['id']})
+            item.add_control("self", self_url)
+            body["items"].append(item)
+
+        body.add_control("self", request.build_absolute_uri())
+
+        body.add_control_post(ctrl_name='gig: create',
+                               title='add a new gig',
+                               href=request.build_absolute_uri(),
+                               schema=GigViewSet.json_schema()
+                               )
+        return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
-        return super().retrieve(request, pk=None)
+        response = super().retrieve(request, pk=None)
+        body = MasonBuilder(response.data)
+        self_url = reverse('gigs-detail', kwargs={'pk': response.data['id']})
+        body.add_control("self", self_url)
+        body.add_control_put(title='update existing gig',
+                             href=self_url,
+                             schema=GigViewSet.json_schema()
+                             )
+        body.add_control_delete(title='remove a gig',
+                                href=self_url
+                                )
+        return JsonResponse(body)
 
     def create(self, request):
 

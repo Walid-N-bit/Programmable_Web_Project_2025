@@ -25,17 +25,13 @@ from gigwork import views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'gigs', views.GigViewSet)
-router.register(r'postings', views.PostingViewSet)
+router.register(r'users', views.UserViewSet, basename="users")
+router.register(r'gigs', views.GigViewSet, basename="gigs")
+router.register(r'postings', views.PostingViewSet, basename="postings")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('gigwork/api/', include(router.urls)),
     path('gigwork/api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('gigwork/api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    #path('test/<int:param>/', views.test),
-    #path('users/<str:field>/<str:value>/', views.UserViewSet.get_users_by_field),
-    #path('gigs/<str:field>/<str:str>/', views.GigViewSet.get_gigs_by_field),
-    #path('postings/<str:field>/<str:str>/', views.PostingViewSet.get_postings_by_field),
     ]
