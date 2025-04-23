@@ -110,7 +110,11 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        body.add_control("self", request.build_absolute_uri())
+        base_url = request.build_absolute_uri(reverse('users-list'))
+        body.add_control("self", base_url)
+        body.add_control(ctrl_name="filter users by field", 
+                         href=base_url 
+                         + "{?id,first_name,last_name,email,phone_number,address,role}")
 
         body.add_control_post(ctrl_name='user: create',
                                title='add a new user',
@@ -210,13 +214,18 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        body.add_control("self", request.build_absolute_uri())
+        base_url = request.build_absolute_uri(reverse('postings-list'))
+        body.add_control("self", base_url)
+        body.add_control(ctrl_name="filter postings by field", 
+                         href=base_url 
+                         + "{?id, title, description, user, created_at, expires_at, price, status}")
 
         body.add_control_post(ctrl_name='posting: create',
                                title='add a new posting',
-                               href=request.build_absolute_uri(),
+                               href=base_url,
                                schema=PostingViewSet.json_schema()
                                )
+        
         return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
@@ -310,11 +319,15 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        body.add_control("self", request.build_absolute_uri())
+        base_url = request.build_absolute_uri(reverse('gigs-list'))
+        body.add_control("self", base_url)
+        body.add_control(ctrl_name="filter gigs by field", 
+                         href=base_url 
+                         + "{?id, title, description, user, start_date, end_date, price, status}")
 
         body.add_control_post(ctrl_name='gig: create',
                                title='add a new gig',
-                               href=request.build_absolute_uri(),
+                               href=base_url,
                                schema=GigViewSet.json_schema()
                                )
         return JsonResponse(body)
