@@ -11,11 +11,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     address = models.TextField()
-    role = models.CharField(max_length=10, 
-                            choices=[
-        ('customer','Customer'), ('employee', 'Employee')
-        ]
-        )
     username = None
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -25,7 +20,7 @@ class User(AbstractUser):
 class Posting(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
-    user = models.ForeignKey(
+    author = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
         default=0  # Assuming user with ID 1 exists
@@ -43,16 +38,18 @@ class Posting(models.Model):
         return self.title
 
 class Gig(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    user = models.ForeignKey(
+    handler = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
         default=0  # Assuming user with ID 1 exists
     )
-    start_date = models.DateTimeField()
+    posting = models.OneToOneField(
+        Posting,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=20,
         choices=[
@@ -60,6 +57,7 @@ class Gig(models.Model):
             ("in_progress", "In Progress"),
             ("completed", "Completed"),
         ],
+        default="pending",
     )
 
     def __str__(self):

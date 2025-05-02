@@ -8,6 +8,7 @@ https://www.django-rest-framework.org/api-guide/exceptions/#apiexception
 https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/#dynamic-schemas-static-methods
 https://www.django-rest-framework.org/api-guide/caching/
 https://docs.djangoproject.com/en/5.2/ref/urlresolvers/#reverse
+https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/#associating-snippets-with-users
 """
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -51,7 +52,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
-    filterset_fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'role']
+    filterset_fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'address']
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
@@ -76,26 +77,24 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                 "address":{
                     "type":"string"
                 },
-                "role":{
-                    "type":"string"
-                }
             }
         }
         return schema
-    #def get_permissions(self):
-    #    pass
-    #    """
-    #    The purpose of this method is to allow for creating new users without
-    #    being blocked by the authentication and permission schemes.
-    #    """
-    #    if self.action == 'new_user':
-    #        permission_classes = []
-    #    else:
-    #        permission_classes = [permissions.IsAuthenticated]
-    #    return [permission() for permission in permission_classes]
-    #authentication_classes = [TokenAuthentication]
-    permission_classes = []
-    authentication_classes = []
+
+    def get_permissions(self):
+       pass
+       """
+       The purpose of this method is to allow for creating new users without
+       being blocked by the authentication and permission schemes.
+       """
+       if self.action == 'create':
+           permission_classes = []
+       else:
+           permission_classes = [permissions.IsAuthenticated]
+       return [permission() for permission in permission_classes]
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = []
+    # authentication_classes = []
 
     @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
@@ -112,8 +111,8 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         base_url = request.build_absolute_uri(reverse('users-list'))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter users by field", 
-                         href=base_url 
+        body.add_control(ctrl_name="filter users by field",
+                         href=base_url
                          + "{?id,first_name,last_name,email,phone_number,address,role}")
 
         body.add_control_post(ctrl_name='user: create',
@@ -121,7 +120,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                                href=request.build_absolute_uri(),
                                schema=UserViewSet.json_schema()
                                )
-    
+
         return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
@@ -162,15 +161,15 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     queryset = Posting.objects.all().order_by('status')
     serializer_class = PostingSerializer
-    filterset_fields = ['id', 'title', 'description', 'user', 'created_at',
+    filterset_fields = ['id', 'title', 'description', 'author', 'created_at',
                         'expires_at', 'price', 'status']
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    #authentication_classes = [TokenAuthentication]
-    #permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    # authentication_classes = []
+    # permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -183,9 +182,6 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                 },
                 "description":{
                     "type":"string"
-                },
-                "user":{
-                    "type":"number"
                 },
                 "created_at":{
                     "type":"string"
@@ -216,16 +212,16 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         base_url = request.build_absolute_uri(reverse('postings-list'))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter postings by field", 
-                         href=base_url 
-                         + "{?id, title, description, user, created_at, expires_at, price, status}")
+        body.add_control(ctrl_name="filter postings by field",
+                         href=base_url
+                         + "{?id, title, description, author, created_at, expires_at, price, status}")
 
         body.add_control_post(ctrl_name='posting: create',
                                title='add a new posting',
                                href=base_url,
                                schema=PostingViewSet.json_schema()
                                )
-        
+
         return JsonResponse(body)
 
     @method_decorator(cache_page(60 * 60))
@@ -244,10 +240,13 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                                 )
         return JsonResponse(body)
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     def create(self, request):
         serializer = PostingSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        self.perform_create(serializer)
         return JsonResponse({"result":"posting added successfully."},
                             status=status.HTTP_201_CREATED)
 
@@ -267,39 +266,30 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     queryset = Gig.objects.all().order_by('status')
     serializer_class = GigSerializer
-    filterset_fields = ['id', 'title', 'description', 'user',
-                        'start_date', 'end_date', 'price', 'status']
+    filterset_fields = ['id', 'handler',
+                        'start_date', 'end_date', 'status']
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    #authentication_classes = [TokenAuthentication]
-    #permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    # authentication_classes = []
+    # permission_classes = []
 
     @staticmethod
     def json_schema():
         schema = {
             "type":"object",
-            "required":["title", "description", "price"],
+            "required": ["posting"],
             "properties":{
-                "title":{
-                    "type":"string"
-                },
-                "description":{
-                    "type":"string"
-                },
-                "user":{
-                    "type":"number"
-                },
+                "posting":{
+                    "type": "number"
+                    },
                 "start_date":{
                     "type":"string"
                 },
                 "end_date":{
                     "type":"string"
-                },
-                "price":{
-                    "type":"number"
                 },
                 "status":{
                     "type":"string"
@@ -308,7 +298,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         }
         return schema
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)
@@ -321,9 +311,9 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         base_url = request.build_absolute_uri(reverse('gigs-list'))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter gigs by field", 
-                         href=base_url 
-                         + "{?id, title, description, user, start_date, end_date, price, status}")
+        body.add_control(ctrl_name="filter gigs by field",
+                         href=base_url
+                         + "{?id, handler, posting, start_date, end_date, status}")
 
         body.add_control_post(ctrl_name='gig: create',
                                title='add a new gig',
@@ -348,16 +338,23 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                                 )
         return JsonResponse(body)
 
-    def create(self, request):
+    def perform_create(self, serializer):
+        gig = serializer.save(handler=self.request.user)
+        gig.posting.status = 'accepted'
+        gig.posting.save()
 
+    def create(self, request):
         serializer = GigSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return JsonResponse({}, status=status.HTTP_201_CREATED)
+
+        self.perform_create(serializer)
+        # after creating a gig, the associated posting is updated here to 'accepted'
+
+        return JsonResponse({"result": "gig added"}, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
         gig = self.get_object()
         serializer = GigSerializer(gig, data= request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return JsonResponse({}, status=status.HTTP_200_OK)
+        return JsonResponse({"result": "gig updated"}, status=status.HTTP_200_OK)
