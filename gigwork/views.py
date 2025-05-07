@@ -9,8 +9,11 @@ https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-api
 https://www.django-rest-framework.org/api-guide/caching/
 https://docs.djangoproject.com/en/5.2/ref/urlresolvers/#reverse
 https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/#associating-snippets-with-users
+https://www.django-rest-framework.org/api-guide/views/
+https://www.django-rest-framework.org/api-guide/permissions/#api-reference
 """
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from rest_framework.authentication import TokenAuthentication
@@ -20,7 +23,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import UnsupportedMediaType, ParseError
 from rest_framework.reverse import reverse
-#from rest_framework.response import Response
+# from rest_framework.response import Response
 from django.http import JsonResponse
 from jsonschema import validate, ValidationError
 from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
@@ -43,6 +46,16 @@ class JsonSchemaMixin:
             return super().update(request)
         except ValidationError as e:
             raise ParseError(detail=str(e))
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticatedOrReadOnly])
+def api_root(request):
+    return JsonResponse({"@controls": {
+        "self": {"href": reverse('api-root', request=request)},
+        "users": {"href": reverse('users-list', request=request)},
+        "postings": {"href": reverse('postings-list', request=request)},
+        "gigs": {"href": reverse('gigs-list', request=request)},
+    }})
 
 class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
@@ -81,29 +94,29 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         }
         return schema
 
-    def get_permissions(self):
-       pass
-       """
-       The purpose of this method is to allow for creating new users without
-       being blocked by the authentication and permission schemes.
-       """
-       if self.action == 'create':
-           permission_classes = []
-       else:
-           permission_classes = [permissions.IsAuthenticated]
-       return [permission() for permission in permission_classes]
-    authentication_classes = [TokenAuthentication]
-    # permission_classes = []
-    # authentication_classes = []
+    # def get_permissions(self):
+    #    pass
+    #    """
+    #    The purpose of this method is to allow for creating new users without
+    #    being blocked by the authentication and permission schemes.
+    #    """
+    #    if self.action == 'create':
+    #        permission_classes = []
+    #    else:
+    #        permission_classes = [permissions.IsAuthenticated]
+    #    return [permission() for permission in permission_classes]
+    # authentication_classes = [TokenAuthentication]
 
-    @method_decorator(cache_page(60 * 60))
+    permission_classes = []
+    authentication_classes = []
+
+    # @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
-
         response = super().list(request)
         body = MasonBuilder(items=[])
         for user in response.data:
-            #return JsonResponse(user, safe=False)
+            # return JsonResponse(user, safe=False)
             item = MasonBuilder(user)
             self_url = reverse('users-detail', kwargs={'pk': user['id']})
             item.add_control("self", self_url)
@@ -123,7 +136,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
@@ -166,10 +179,10 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    # authentication_classes = []
-    # permission_classes = []
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -271,10 +284,10 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    # authentication_classes = []
-    # permission_classes = []
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -298,7 +311,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         }
         return schema
 
-    # @method_decorator(cache_page(60 * 60))
+    @method_decorator(cache_page(60 * 60))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)

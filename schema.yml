@@ -12,22 +12,18 @@ paths:
         theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
       parameters:
       - in: query
-        name: description
-        schema:
-          type: string
-      - in: query
         name: end_date
         schema:
           type: string
           format: date-time
       - in: query
-        name: id
+        name: handler
         schema:
           type: integer
       - in: query
-        name: price
+        name: id
         schema:
-          type: number
+          type: integer
       - in: query
         name: start_date
         schema:
@@ -45,14 +41,6 @@ paths:
           * `pending` - Pending
           * `in_progress` - In Progress
           * `completed` - Completed
-      - in: query
-        name: title
-        schema:
-          type: string
-      - in: query
-        name: user
-        schema:
-          type: integer
       tags:
       - gigwork
       responses:
@@ -190,6 +178,10 @@ paths:
         theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
       parameters:
       - in: query
+        name: author
+        schema:
+          type: integer
+      - in: query
         name: created_at
         schema:
           type: string
@@ -227,10 +219,6 @@ paths:
         name: title
         schema:
           type: string
-      - in: query
-        name: user
-        schema:
-          type: integer
       tags:
       - gigwork
       responses:
@@ -358,6 +346,19 @@ paths:
       - gigwork
       responses:
         '204':
+          description: No response body
+  /gigwork/api/root/:
+    get:
+      operationId: gigwork_api_root_retrieve
+      tags:
+      - gigwork
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
           description: No response body
   /gigwork/api/schema/:
     get:
@@ -538,16 +539,6 @@ paths:
         name: phone_number
         schema:
           type: string
-      - in: query
-        name: role
-        schema:
-          type: string
-          enum:
-          - customer
-          - employee
-        description: |-
-          * `customer` - Customer
-          * `employee` - Employee
       tags:
       - gigwork
       responses:
@@ -685,34 +676,27 @@ components:
         id:
           type: integer
           readOnly: true
-        title:
-          type: string
-          maxLength: 100
-        description:
-          type: string
-        user:
+        handler:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        posting:
           type: integer
         start_date:
           type: string
           format: date-time
+          readOnly: true
         end_date:
           type: string
           format: date-time
           nullable: true
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         status:
           $ref: '#/components/schemas/GigStatusEnum'
       required:
-      - description
+      - handler
       - id
-      - price
+      - posting
       - start_date
-      - status
-      - title
-      - user
     GigStatusEnum:
       enum:
       - pending
@@ -730,24 +714,20 @@ components:
         id:
           type: integer
           readOnly: true
-        title:
-          type: string
-          maxLength: 100
-        description:
-          type: string
-        user:
+        handler:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        posting:
           type: integer
         start_date:
           type: string
           format: date-time
+          readOnly: true
         end_date:
           type: string
           format: date-time
           nullable: true
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         status:
           $ref: '#/components/schemas/GigStatusEnum'
     PatchedPosting:
@@ -760,10 +740,12 @@ components:
         title:
           type: string
           maxLength: 100
+        author:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
         description:
           type: string
-        user:
-          type: integer
         created_at:
           type: string
           format: date-time
@@ -799,8 +781,6 @@ components:
           type: string
         address:
           type: string
-        role:
-          type: string
     Posting:
       type: object
       description: convert 'Posting' model into a python dictionary
@@ -811,10 +791,12 @@ components:
         title:
           type: string
           maxLength: 100
+        author:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
         description:
           type: string
-        user:
-          type: integer
         created_at:
           type: string
           format: date-time
@@ -830,12 +812,12 @@ components:
         status:
           $ref: '#/components/schemas/PostingStatusEnum'
       required:
+      - author
       - created_at
       - description
       - id
       - price
       - title
-      - user
     PostingStatusEnum:
       enum:
       - open
@@ -846,6 +828,25 @@ components:
         * `open` - Open
         * `expired` - Expired
         * `accepted` - Accepted
+    PublicUser:
+      type: object
+      description: |-
+        convert 'User' model into a python dictionary.
+        this class contains only fields that would be available to other users than the owner.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 50
+        last_name:
+          type: string
+          maxLength: 50
+      required:
+      - first_name
+      - id
+      - last_name
     User:
       type: object
       description: convert 'User' model into a python dictionary
@@ -866,8 +867,6 @@ components:
         phone_number:
           type: string
         address:
-          type: string
-        role:
           type: string
       required:
       - email

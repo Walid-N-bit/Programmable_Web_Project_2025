@@ -19,7 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
     """
     phone_number = serializers.CharField(required=False)
     address = serializers.CharField(required=False)
-    # role = serializers.CharField(required=False)
     class Meta:
         """
         this inner class specifies the model associated with the serializer
@@ -34,7 +33,7 @@ class PublicUserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['first_name', 'last_name']
+        fields = ['id', 'first_name', 'last_name']
 
 class PostingSerializer(serializers.ModelSerializer):
     """

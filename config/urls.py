@@ -32,6 +32,7 @@ router.register(r'postings', views.PostingViewSet, basename="postings")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('gigwork/api/', include(router.urls)),
+    path('gigwork/api/root/', views.api_root, name='api-root'),
     path('gigwork/api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('gigwork/api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     ]
