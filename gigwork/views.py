@@ -31,14 +31,14 @@ from gigwork.models import User, Gig, Posting
 from gigwork.masonbuilder import MasonBuilder
 
 class JsonSchemaMixin:
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         try:
             validate(request.data, self.json_schema())
             return super().create(request)
         except ValidationError as e:
             raise ParseError(detail=str(e))
 
-    def update(self, request):
+    def update(self, request, *args, **kwargs):
         if request.content_type != 'application/json':
             raise UnsupportedMediaType
         try:
@@ -95,7 +95,6 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         return schema
 
     # def get_permissions(self):
-    #    pass
     #    """
     #    The purpose of this method is to allow for creating new users without
     #    being blocked by the authentication and permission schemes.

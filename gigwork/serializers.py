@@ -12,6 +12,7 @@ from decimal import Decimal
 from rest_framework import serializers, status
 from django.http import JsonResponse
 from gigwork.models import User, Gig, Posting
+from rest_framework.reverse import reverse
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -31,6 +32,12 @@ class PublicUserSerializer(serializers.ModelSerializer):
     convert 'User' model into a python dictionary.
     this class contains only fields that would be available to other users than the owner.
     """
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['@controls'] = {
+        "self": { "href": reverse("users-detail", args=[data['id']])}
+                 }
+        return data
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name']
