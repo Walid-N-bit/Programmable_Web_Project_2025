@@ -20,14 +20,14 @@ class APIDataSource:
     """
     generic API class
     """
-    def __init__(self, host, ca_cert=None, api_key=None):
+    def __init__(self, host, ca_cert=None, token=None):
         assert host.startswith("http"), "No protocol in host address"
         self.host = host
         self.session = requests.Session()
         if ca_cert:
             self.session.verify = ca_cert
-        if api_key:
-            self.session.headers.update({"Authorization": api_key})
+        if token:
+            self.session.headers.update({"Authorization": token})
 
     def __enter__(self):
         return self
@@ -67,10 +67,10 @@ def get_gigs_uri(client, root):
     return response.get('@controls').get('gigs').get('href')
 
 def list_table(data, res):
-    table = Table(title=f"List of {res}")
+    table = Table(title=f"List of {res}", show_lines=True)
     items = data.get("items")
     for key in items[0].keys():
-        table.add_column(key, justify='left')    
+        table.add_column(key, justify='left', no_wrap=False)    
     for item in items:
         row = [str(item.get(k,"")) for k in items[0].keys()]
         table.add_row(*row)
@@ -100,6 +100,10 @@ def print_instance(data, is_json):
         out = retrieve_instance(data)
         console.print(out)
 
+def create_token_file(resp):
+    with open('.token', 'w') as file:
+        file.write(f"Token {resp.get('Token', '')}")
+
 if __name__ ==  "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("resource", help="")
@@ -116,12 +120,12 @@ if __name__ ==  "__main__":
         pass
     else:
         try:
-            with open(".apikey") as keyfile:
-                key = keyfile.read().strip()
+            with open(".token") as tokenfile:
+                token = tokenfile.read().strip()
         except FileNotFoundError:
-            key = None
+            token = None
         
-        with APIDataSource(args.host, args.ca, key) as api:
+        with APIDataSource(args.host, args.ca, token) as api:
             root_uri = get_root_uri(args.host)
             
             if args.resource == 'users':
@@ -139,6 +143,7 @@ if __name__ ==  "__main__":
                     uri = get_users_uri(api, root_uri)
                     data = json.loads(args.data)
                     response = api._post(uri, data)
+                    create_token_file(response)
                     pprint(response)
 
                 elif args.command == 'update':

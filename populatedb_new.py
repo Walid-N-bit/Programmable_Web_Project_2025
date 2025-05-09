@@ -1,11 +1,11 @@
 import os
 import django
-from datetime import datetime, timedelta
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
+from datetime import datetime, timedelta
 from gigwork.models import User, Posting, Gig
 
 def populate_db():
@@ -38,7 +38,7 @@ def populate_db():
     posting1 = Posting.objects.create(
         title="Help with yard work",
         description="Trim bushes, mow lawn, 2-3 hours",
-        author=user_objs[0],  # Tony Stark
+        owner=user_objs[0],  # Tony Stark
         expires_at=week_ahead,
         price=120.00,
         status="open"
@@ -47,7 +47,7 @@ def populate_db():
     posting2 = Posting.objects.create(
         title="Assemble furniture",
         description="IKEA wardrobe assembly",
-        author=user_objs[1],  # Bruce Wayne
+        owner=user_objs[1],  # Bruce Wayne
         expires_at=week_ago,
         price=90.00,
         status="expired"
@@ -55,7 +55,7 @@ def populate_db():
 
     # Create Gigs
     gig1 = Gig.objects.create(
-        handler=user_objs[2],  # Clark Kent
+        owner=user_objs[2],  # Clark Kent
         posting=posting1,
         start_date=week_ago,
         end_date=now,
@@ -63,7 +63,7 @@ def populate_db():
     )
 
     gig2 = Gig.objects.create(
-        handler=user_objs[3],  # Diana Prince
+        owner=user_objs[3],  # Diana Prince
         posting=posting2,
         start_date=week_ago,
         end_date=week_ahead,

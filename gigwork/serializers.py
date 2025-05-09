@@ -49,7 +49,7 @@ class PostingSerializer(serializers.ModelSerializer):
     # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     # should be changed to "author"?
-    author = PublicUserSerializer(read_only=True)
+    owner = PublicUserSerializer(read_only=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
 
     def to_internal_value(self, data):
@@ -65,17 +65,17 @@ class PostingSerializer(serializers.ModelSerializer):
         this inner class specifies the model associated with the serializer
         """
         model = Posting
-        fields = ['id', 'title', 'author', 'description', 'created_at', 'expires_at', 'price', 'status']
+        fields = ['id', 'title', 'owner', 'description', 'created_at', 'expires_at', 'price', 'status']
 
 class GigSerializer(serializers.ModelSerializer):
     """
     convert 'Gig' model into a python dictionary
     """
-    handler = PublicUserSerializer(read_only=True)
+    owner = PublicUserSerializer(read_only=True)
     posting = serializers.PrimaryKeyRelatedField(queryset=Posting.objects.all(), many=False)
     class Meta:
         """
         this inner class specifies the model associated with the serializer
         """
         model = Gig
-        fields = ['id', 'handler', 'posting', 'start_date', 'end_date', 'status']
+        fields = ['id', 'owner', 'posting', 'start_date', 'end_date', 'status']

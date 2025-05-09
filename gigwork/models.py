@@ -20,7 +20,7 @@ class User(AbstractUser):
 class Posting(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
-    author = models.ForeignKey(
+    owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
         default=0  # Assuming user with ID 1 exists
@@ -38,7 +38,7 @@ class Posting(models.Model):
         return self.title
 
 class Gig(models.Model):
-    handler = models.ForeignKey(
+    owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
         default=0  # Assuming user with ID 1 exists

@@ -23,12 +23,12 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import UnsupportedMediaType, ParseError
 from rest_framework.reverse import reverse
-# from rest_framework.response import Response
 from django.http import JsonResponse
 from jsonschema import validate, ValidationError
+from gigwork.masonbuilder import MasonBuilder
 from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
 from gigwork.models import User, Gig, Posting
-from gigwork.masonbuilder import MasonBuilder
+from gigwork.custom_permissions import IsOwnerOrReadOnly
 
 class JsonSchemaMixin:
     def create(self, request, *args, **kwargs):
@@ -94,22 +94,27 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         }
         return schema
 
-    # def get_permissions(self):
-    #    """
-    #    The purpose of this method is to allow for creating new users without
-    #    being blocked by the authentication and permission schemes.
-    #    """
-    #    if self.action == 'create':
-    #        permission_classes = []
-    #    else:
-    #        permission_classes = [permissions.IsAuthenticated]
-    #    return [permission() for permission in permission_classes]
-    # authentication_classes = [TokenAuthentication]
+    def get_permissions(self):
+       """
+       The purpose of this method is to allow for creating new users without
+       being blocked by the authentication and permission schemes.
+       """
+       if self.action == 'create':
+           permission_classes = []
+       else:
+           permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+       return [permission() for permission in permission_classes]
+    authentication_classes = [TokenAuthentication]
 
-    permission_classes = []
-    authentication_classes = []
+    # permission_classes = []
+    # authentication_classes = []
 
-    # @method_decorator(cache_page(60 * 60))
+    def get_object(self):
+        obj = Posting.objects.get(pk = self.kwargs['pk'])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)
@@ -135,7 +140,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse(body)
 
-    # @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
@@ -173,15 +178,15 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     queryset = Posting.objects.all().order_by('status')
     serializer_class = PostingSerializer
-    filterset_fields = ['id', 'title', 'description', 'author', 'created_at',
+    filterset_fields = ['id', 'title', 'description', 'owner', 'created_at',
                         'expires_at', 'price', 'status']
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # authentication_classes = []
+    # permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -210,8 +215,13 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             }
         }
         return schema
+    
+    def get_object(self):
+        obj = Posting.objects.get(pk = self.kwargs['pk'])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)
@@ -226,7 +236,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         body.add_control("self", base_url)
         body.add_control(ctrl_name="filter postings by field",
                          href=base_url
-                         + "{?id, title, description, author, created_at, expires_at, price, status}")
+                         + "{?id, title, description, owner, created_at, expires_at, price, status}")
 
         body.add_control_post(ctrl_name='posting: create',
                                title='add a new posting',
@@ -236,7 +246,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
@@ -253,7 +263,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         return JsonResponse(body)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(owner=self.request.user)
 
     def create(self, request):
         serializer = PostingSerializer(data= request.data)
@@ -278,15 +288,15 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     queryset = Gig.objects.all().order_by('status')
     serializer_class = GigSerializer
-    filterset_fields = ['id', 'handler',
+    filterset_fields = ['id', 'owner',
                         'start_date', 'end_date', 'status']
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # authentication_classes = []
+    # permission_classes = []
 
     @staticmethod
     def json_schema():
@@ -310,7 +320,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         }
         return schema
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)
@@ -325,7 +335,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         body.add_control("self", base_url)
         body.add_control(ctrl_name="filter gigs by field",
                          href=base_url
-                         + "{?id, handler, posting, start_date, end_date, status}")
+                         + "{?id, owner, posting, start_date, end_date, status}")
 
         body.add_control_post(ctrl_name='gig: create',
                                title='add a new gig',
@@ -334,7 +344,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
                                )
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 60))
+    # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
@@ -351,7 +361,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         return JsonResponse(body)
 
     def perform_create(self, serializer):
-        gig = serializer.save(handler=self.request.user)
+        gig = serializer.save(owner=self.request.user)
         gig.posting.status = 'accepted'
         gig.posting.save()
 
