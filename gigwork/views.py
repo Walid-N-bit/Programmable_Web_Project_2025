@@ -130,7 +130,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         body.add_control("self", base_url)
         body.add_control(ctrl_name="filter users by field",
                          href=base_url
-                         + "{?id,first_name,last_name,email,phone_number,address,role}")
+                         + "{?id,first_name,last_name,email,phone_number,address}")
 
         body.add_control_post(ctrl_name='user: create',
                                title='add a new user',

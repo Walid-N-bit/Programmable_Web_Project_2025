@@ -47,8 +47,6 @@ class PostingSerializer(serializers.ModelSerializer):
     convert 'Posting' model into a python dictionary
     """
     # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    # should be changed to "author"?
     owner = PublicUserSerializer(read_only=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
 
