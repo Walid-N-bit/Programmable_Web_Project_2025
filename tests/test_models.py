@@ -22,7 +22,6 @@ class GigworkTests(TestCase):
             email="customer1@asd.com",
             phone_number="1234567890",
             address="Testitie 12, 90500 Oulu",
-            role="customer",
 
         )
         user2 = User.objects.create(
@@ -31,7 +30,6 @@ class GigworkTests(TestCase):
             email="customer2@asd.com",
             phone_number="0987654321",
             address="Testitie 13, 90520 Oulu",
-            role="customer",
 
         )
 
@@ -41,21 +39,19 @@ class GigworkTests(TestCase):
             last_name="user three",
             email="employee1@asd.com",
             phone_number="1234567890",
-            role="employee",
         )
         user4 = User.objects.create(
             first_name="user four",
             last_name="user four",
             email="employee2@asd.com",
             phone_number="0987654321",
-            role="employee",
         )
 
         # Create Postings
         posting1 = Posting.objects.create(
             title="Posting One",
             description="Hey you, you're finally awake.",
-            user=user1,
+            owner=user1,
             expires_at=week_ahead,
             price=100.00,
             status="open",
@@ -63,7 +59,7 @@ class GigworkTests(TestCase):
         posting2 = Posting.objects.create(
             title="Posting Two",
             description="You were trying to cross the border, right?",
-            user=user2,
+            owner=user2,
             expires_at=week_ago,
             price=200.00,
             status="expired",
@@ -71,7 +67,7 @@ class GigworkTests(TestCase):
         posting3 = Posting.objects.create(
             title="Posting Three",
             description="Walked right into that Imperial ambush, same as us, and that thief over there.",
-            user=user3,
+            owner=user3,
             expires_at=week_ahead,
             price=300.00,
             status="accepted",
@@ -79,21 +75,17 @@ class GigworkTests(TestCase):
 
         # Create Gigs
         gig1 = Gig.objects.create(
-            title="Gig One",
-            description="For the Emperor!",
-            user=user1,
+            owner=user1,
+            posting=posting2,
             start_date=week_ago,
             end_date=now,
-            price=100.00,
             status="completed",
         )
         gig2 = Gig.objects.create(
-            title="Gig Two",
-            description="Damn you Stormcloaks. Skyrim was fine until you came along.",
-            user=user2,
+            owner=user2,
+            posting=posting3,
             start_date=week_ago,
             end_date=week_ahead,
-            price=200.00,
             status="in_progress",
         )
 
@@ -108,3 +100,8 @@ class GigworkTests(TestCase):
     def test_gig_count(self):
         gigs = Gig.objects.all()
         self.assertEqual(gigs.count(), 2)
+    
+    def test__str__(self):
+        self.assertEqual(User.objects.get(id=1).__str__(), 'User One User One')
+        self.assertEqual(Posting.objects.get(id=1).__str__(), 'Posting One')
+        self.assertEqual(Gig.objects.get(id=1).__str__(), 'Posting Two')
