@@ -143,9 +143,10 @@ def create_token_file(resp):
 def main():
     """main client function"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("resource", help="Resource collection name: users, postings, gigs")
+    parser.add_argument("host", dest="host", help="API host address")
+    parser.add_argument("resource", help="Collection resource name: users, postings, gigs")
     parser.add_argument("action",
-                        help="Action to be applied to the resource: " \
+                        help="Operation to be applied to the resource: " \
                         "list, retrieve, create, update, delete, filter." \
                         "data format for filter: '?field_1=value_1,...'.")
     parser.add_argument("--pk", dest='pk', help="Primary Key to resource instance")
@@ -153,7 +154,6 @@ def main():
     parser.add_argument("--json", action='store_true',
                         help="Include to print the output in json format." \
                         "default is printing in table format.")
-    parser.add_argument("--host", dest="host", help="API host address")
     parser.add_argument("--ca", dest="ca", default=None, help="CA certificate file")
     try:
         args = parser.parse_args()

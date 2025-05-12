@@ -12,10 +12,16 @@ https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
 https://www.django-rest-framework.org/api-guide/views/
 https://www.django-rest-framework.org/api-guide/permissions/#api-reference
 """
+# standard library
+from jsonschema import validate, ValidationError
+
+# Django
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from rest_framework.decorators import api_view, permission_classes
-from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
+
+# Django rest framework
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import permissions, viewsets, status
 from rest_framework.parsers import JSONParser
@@ -23,8 +29,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import UnsupportedMediaType, ParseError
 from rest_framework.reverse import reverse
-from django.http import JsonResponse
-from jsonschema import validate, ValidationError
+
+# local modules
 from gigwork.masonbuilder import MasonBuilder
 from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
 from gigwork.models import User, Gig, Posting
@@ -34,18 +40,18 @@ class JsonSchemaMixin:
     def create(self, request, *args, **kwargs):
         try:
             validate(request.data, self.json_schema())
-            return super().create(request)
+            return super().create(request, *args, **kwargs)
         except ValidationError as e:
-            raise ParseError(detail=str(e))
+            raise ParseError(detail=str(e)) from e
 
     def update(self, request, *args, **kwargs):
         if request.content_type != 'application/json':
             raise UnsupportedMediaType
         try:
             validate(request.data, self.json_schema())
-            return super().update(request)
+            return super().update(request, *args, **kwargs)
         except ValidationError as e:
-            raise ParseError(detail=str(e))
+            raise ParseError(detail=str(e)) from e
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
@@ -95,15 +101,15 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         return schema
 
     def get_permissions(self):
-       """
-       The purpose of this method is to allow for creating new users without
-       being blocked by the authentication and permission schemes.
-       """
-       if self.action == 'create':
-           permission_classes = []
-       else:
-           permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
-       return [permission() for permission in permission_classes]
+        """
+        The purpose of this method is to allow for creating new users without
+        being blocked by the authentication and permission schemes.
+        """
+        if self.action == 'create':
+            permission_classes = []
+        else:
+            permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+        return [permission() for permission in permission_classes]
     authentication_classes = [TokenAuthentication]
 
     # permission_classes = []
@@ -215,7 +221,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             }
         }
         return schema
-    
+
     def get_object(self):
         obj = Posting.objects.get(pk = self.kwargs['pk'])
         self.check_object_permissions(self.request, obj)
@@ -223,7 +229,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         response = super().list(request)
         body = MasonBuilder(items=[])
         for posting in response.data:
@@ -235,8 +241,9 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         base_url = request.build_absolute_uri(reverse('postings-list'))
         body.add_control("self", base_url)
         body.add_control(ctrl_name="filter postings by field",
-                         href=base_url
-                         + "{?id, title, description, owner, created_at, expires_at, price, status}")
+                         href=base_url+
+                         "{?id, title, description, owner, created_at,"
+                         "expires_at, price, status}")
 
         body.add_control_post(ctrl_name='posting: create',
                                title='add a new posting',
@@ -248,7 +255,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)
         body = MasonBuilder(response.data)
         self_url = reverse('postings-detail', kwargs={'pk': response.data['id']})
@@ -265,14 +272,14 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = PostingSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return JsonResponse({"result":"posting added successfully."},
                             status=status.HTTP_201_CREATED)
 
-    def update(self, request, pk=None):
+    def update(self, request, pk=None, *args, **kwargs):
 
         posting = self.get_object()
         serializer = PostingSerializer(posting, data= request.data)
@@ -322,7 +329,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         response = super().list(request)
         body = MasonBuilder(items=[])
         for gig in response.data:
@@ -346,7 +353,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     # @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)
         body = MasonBuilder(response.data)
         self_url = reverse('gigs-detail', kwargs={'pk': response.data['id']})
@@ -365,7 +372,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         gig.posting.status = 'accepted'
         gig.posting.save()
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = GigSerializer(data= request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -374,7 +381,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse({"result": "gig added"}, status=status.HTTP_201_CREATED)
 
-    def update(self, request, pk=None):
+    def update(self, request, pk=None, *args, **kwargs):
         gig = self.get_object()
         serializer = GigSerializer(gig, data= request.data)
         serializer.is_valid(raise_exception=True)
