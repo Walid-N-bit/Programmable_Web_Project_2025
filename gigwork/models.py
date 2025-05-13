@@ -23,7 +23,6 @@ class Posting(models.Model):
     owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
-        default=0  # Assuming user with ID 1 exists
     )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True)
@@ -41,7 +40,6 @@ class Gig(models.Model):
     owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
-        default=0  # Assuming user with ID 1 exists
     )
     posting = models.OneToOneField(
         Posting,
@@ -61,6 +59,4 @@ class Gig(models.Model):
     )
 
     def __str__(self):
-        return self.title
-
-
+        return self.posting.title

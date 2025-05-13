@@ -52,8 +52,6 @@ class PostingSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         price = data.get('price')
-        if not isinstance(price, (int, float, Decimal)):
-            raise serializers.ValidationError({"error":"price must be a number"})
         if price <= 0:
             raise serializers.ValidationError({"error":"price must be a positive non-zero value"})
         return data
