@@ -58,6 +58,7 @@ def api_root(request):
                 "users": {"href": reverse("users-list", request=request)},
                 "postings": {"href": reverse("postings-list", request=request)},
                 "gigs": {"href": reverse("gigs-list", request=request)},
+                "schema": {"href": reverse("schema", request=request)},
             }
         }
     )
@@ -119,7 +120,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request):
         response = super().list(request)
@@ -146,7 +147,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
@@ -225,7 +226,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
         response = super().list(request)
@@ -253,7 +254,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)
@@ -326,7 +327,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
         response = super().list(request)
@@ -352,7 +353,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         )
         return JsonResponse(body)
 
-    @method_decorator(cache_page(60 * 5))
+    @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)

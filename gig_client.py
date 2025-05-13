@@ -12,12 +12,13 @@ https://docs.python.org/3/library/argparse.html#the-add-argument-method
 https://rich.readthedocs.io/en/stable/tables.html
 https://www.geeksforgeeks.org/python-unpack-list/
 https://www.geeksforgeeks.org/python-ways-to-convert-string-to-json-object/
+https://www.geeksforgeeks.org/python-program-to-remove-last-character-from-the-string/
 """
-
+import os
 import argparse
 import json
 from urllib.parse import urljoin
-
+from yaml import safe_load
 import requests
 from rich.console import Console
 from rich.pretty import pprint
@@ -46,35 +47,44 @@ class APIDataSource:
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.session.close()
 
-    def _get(self, uri):
+    def get(self, uri):
+        """
+        HTTP GET request
+        """
         response = self.session.get(urljoin(self.host, uri))
         assert response.status_code == 200
         return response.json()
 
-    def _post(self, uri, data):
+    def post(self, uri, data):
+        """
+        HTTP POST request
+        """
         response = self.session.post(urljoin(self.host, uri), json=data)
         assert response.status_code == 201
         return response.json()
 
-    def _put(self, uri, data):
+    def put(self, uri, data):
+        """
+        HTTP PUT request
+        """
         response = self.session.put(urljoin(self.host, uri), json=data)
         assert response.status_code == 200
+        return response.json()
 
-    def _delete(self, uri):
+    def delete(self, uri):
+        """
+        HTTP DELETE request
+        """
         response = self.session.delete(urljoin(self.host, uri))
         assert response.status_code == 204
 
-    def get(self, uri):
-        return self._get(uri)
-
-    def post(self, uri, data):
-        return self._post(uri, data)
-
-    def put(self, uri, data):
-        return self._put(uri, data)
-
-    def delete(self, uri):
-        return self._delete(uri)
+    def get_schema(self, uri):
+        """
+        HTTP GET request for yaml schema
+        """
+        response = self.session.get(urljoin(self.host, uri))
+        assert response.status_code == 200
+        return safe_load(response.text)
 
 
 def get_root_uri(host_uri):
@@ -108,6 +118,14 @@ def get_gigs_uri(client, root):
     return response.get("@controls").get("gigs").get("href")
 
 
+def get_schema_uri(client, root):
+    """
+    return the URI for gigs
+    """
+    response = client.get(root)
+    return response.get("@controls").get("schema").get("href")
+
+
 def list_table(data, res):
     """
     create and return a Table() object containing response data
@@ -115,8 +133,12 @@ def list_table(data, res):
     """
     table = Table(title=f"List of {res}", show_lines=True)
     items = data.get("items")
-    for key in items[0].keys():
-        table.add_column(key, justify="left", no_wrap=False)
+    colors = ['white', 'red', 'yellow',
+              'green', 'blue', 'cyan',
+              'magenta', 'purple', 'green',
+              'blue', 'cyan', 'yellow']
+    for key, color in zip(items[0].keys(), colors):
+        table.add_column(key, justify="left", no_wrap=False, style=color)
     for item in items:
         row = [str(item.get(k, "")) for k in items[0].keys()]
         table.add_row(*row)
@@ -138,7 +160,9 @@ def retrieve_instance(data):
 
 
 def print_list(data, res, is_json):
-    """display list data either in table or json formats"""
+    """
+    display list data either in table or json formats
+    """
     console = Console()
     if is_json:
         pprint(data)
@@ -148,7 +172,9 @@ def print_list(data, res, is_json):
 
 
 def print_instance(data, is_json):
-    """display an instance data either in table or json formats"""
+    """
+    display an instance data either in table or json formats
+    """
     console = Console()
     if is_json:
         pprint(data)
@@ -158,15 +184,131 @@ def print_instance(data, is_json):
 
 
 def create_token_file(resp):
-    """create .token file using response data"""
+    """
+    create .token file using response data
+    """
     with open(".token", "w", encoding="utf-8") as file:
         file.write(f"Token {resp.get('Token', '')}")
+
+def get_resource_keys(client, uri, resource):
+    """
+    return list of keys for the given resource model
+    """
+    schema = client.get_schema(uri)
+    schemas = schema.get('components', {}).get('schemas', {})
+    props = {}
+    if resource == "users":
+        props = schemas.get('User').get('properties', {})
+    elif resource == "postings":
+        props = schemas.get('Posting').get('properties', {})
+    elif resource == "gigs":
+        props = schemas.get('Gig').get('properties', {})
+
+    keys = list(props.keys())
+    auto_fields = [
+        'id',
+        'owner',
+        'created_at',
+        'expires_at',
+        'start_date',
+        'end_date',
+        '@controls']
+    for field in auto_fields:
+        if field in keys:
+            keys.remove(field)
+    return keys
+
+def data_input(keys):
+    """
+    prompt user to input value for each key
+    """
+    pprint("Please input necessary data:")
+    data = {}
+    for key in keys:
+        value = input(f"{key}: ")
+        if value:
+            data[key] = value
+
+    price = data.get('price')
+    if price:
+        data['price'] = float(price)
+    posting = data.get('posting')
+    if posting:
+        data['posting'] = int(posting)
+    return data
+
+def filter_data_str(data, keys):
+    """
+    return a query string
+    """
+    fltr = "?"
+    for key in keys:
+        value = data.get(key)
+        if value:
+            fltr += f"{key}={value},"
+    return fltr[:-1]
+
+
+def list_func(client, uri, resource, is_json):
+    """
+    handler function for list action
+    """
+    response = client.get(uri)
+    print_list(response, resource, is_json)
+
+
+def retrieve_func(client, uri, pk, is_json):
+    """
+    handler function for retrieve action
+    """
+    full_uri = urljoin(uri, pk + "/")
+    response = client.get(full_uri)
+    print_instance(response, is_json)
+
+
+def create_func(client, uri, keys, res):
+    """
+    handler function for create action
+    """
+    input_data = data_input(keys)
+    response = client.post(uri, input_data)
+    if res == 'users':
+        create_token_file(response)
+    pprint(response)
+
+
+def update_func(client, uri, pk, keys):
+    """
+    handler function for update action
+    """
+    full_uri = urljoin(uri, pk + "/")
+    data = data_input(keys)
+    client.put(full_uri, data)
+
+
+def delete_func(client, uri, pk):
+    """
+    handler function for delete action
+    """
+    full_uri = urljoin(uri, pk + "/")
+    client.delete(full_uri)
+
+
+def filter_func(client, uri, keys, resource, is_json):
+    """
+    handler function for filter action
+    """
+    data = data_input(keys)
+    filter_str = filter_data_str(data, keys)
+    full_uri = urljoin(uri, filter_str)
+    response = client.get(full_uri)
+    print_list(response, resource, is_json)
 
 
 def main():
     """main client function"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("host", dest="host", help="API host address")
+    parser.add_argument("host", help="API host address")
     parser.add_argument(
         "resource", help="Collection resource name: users, postings, gigs"
     )
@@ -177,9 +319,6 @@ def main():
         "data format for filter: '?field_1=value_1,...'.",
     )
     parser.add_argument("--pk", dest="pk", help="Primary Key to resource instance")
-    parser.add_argument(
-        "--data", dest="data", help="Data to be used in create or update actions"
-    )
     parser.add_argument(
         "--json",
         action="store_true",
@@ -201,106 +340,73 @@ def main():
 
         with APIDataSource(args.host, args.ca, token) as api:
             root_uri = get_root_uri(args.host)
+            schema_uri = get_schema_uri(api, root_uri)
 
             if args.resource == "users":
+                keys = get_resource_keys(api, schema_uri, args.resource)
+                users_uri = get_users_uri(api, root_uri)
                 if args.action == "list":
-                    users_uri = get_users_uri(api, root_uri)
-                    resp = api.get(users_uri)
-                    print_list(resp, args.resource, args.json)
+                    list_func(api, users_uri, args.resource, args.json)
 
                 elif args.action == "retrieve":
-                    users_uri = urljoin(get_users_uri(api, root_uri), args.pk + "/")
-                    resp = api.get(users_uri)
-                    print_instance(resp, args.json)
+                    retrieve_func(api, users_uri, args.pk, args.json)
 
                 elif args.action == "create":
-                    users_uri = get_users_uri(api, root_uri)
-                    input_data = json.loads(args.data)
-                    resp = api.post(users_uri, input_data)
-                    create_token_file(resp)
-                    pprint(resp)
+                    create_func(api, users_uri, keys, args.resource)
 
                 elif args.action == "update":
-                    users_uri = urljoin(get_users_uri(api, root_uri), args.pk + "/")
-                    input_data = json.loads(args.data)
-                    resp = api.put(users_uri, input_data)
+                    update_func(api, users_uri, args.pk, keys)
 
                 elif args.action == "delete":
-                    users_uri = urljoin(get_users_uri(api, root_uri), args.pk + "/")
-                    resp = api.delete(users_uri)
+                    delete_func(api, users_uri, args.pk)
+                    os.remove('.token')
 
                 elif args.action == "filter":
-                    users_uri = urljoin(get_users_uri(api, root_uri), args.data)
-                    resp = api.get(users_uri)
-                    print_list(resp, args.resource, args.json)
+                    filter_func(api, users_uri, keys, args.resource, args.json)
+
 
             elif args.resource == "postings":
+                keys = get_resource_keys(api, schema_uri, args.resource)
+                postings_uri = get_postings_uri(api, root_uri)
                 if args.action == "list":
-                    postings_uri = get_postings_uri(api, root_uri)
-                    resp = api.get(postings_uri)
-                    print_list(resp, args.resource, args.json)
+                    list_func(api, postings_uri, args.resource, args.json)
 
                 elif args.action == "retrieve":
-                    postings_uri = urljoin(
-                        get_postings_uri(api, root_uri), args.pk + "/"
-                    )
-                    resp = api.get(postings_uri)
-                    print_instance(resp, args.json)
+                    retrieve_func(api, postings_uri, args.pk, args.json)
 
                 elif args.action == "create":
-                    postings_uri = get_postings_uri(api, root_uri)
-                    input_data = json.loads(args.data)
-                    resp = api.post(postings_uri, input_data)
-                    pprint(resp)
+                    create_func(api, postings_uri, keys, args.resource)
 
                 elif args.action == "update":
-                    postings_uri = urljoin(
-                        get_postings_uri(api, root_uri), args.pk + "/"
-                    )
-                    input_data = json.loads(args.data)
-                    resp = api.put(postings_uri, input_data)
+                    update_func(api, postings_uri, args.pk, keys)
 
                 elif args.action == "delete":
-                    postings_uri = urljoin(
-                        get_postings_uri(api, root_uri), args.pk + "/"
-                    )
-                    resp = api.delete(postings_uri)
+                    delete_func(api, postings_uri, args.pk)
 
                 elif args.action == "filter":
-                    postings_uri = urljoin(get_postings_uri(api, root_uri), args.data)
-                    resp = api.get(postings_uri)
-                    print_list(resp, args.resource, args.json)
+                    filter_func(api, postings_uri, keys, args.resource, args.json)
+
 
             elif args.resource == "gigs":
+                keys = get_resource_keys(api, schema_uri, args.resource)
+                gigs_uri = get_gigs_uri(api, root_uri)
                 if args.action == "list":
-                    gigs_uri = get_gigs_uri(api, root_uri)
-                    resp = api.get(gigs_uri)
-                    print_list(resp, args.resource, args.json)
+                    list_func(api, gigs_uri, args.resource, args.json)
 
                 elif args.action == "retrieve":
-                    gigs_uri = urljoin(get_gigs_uri(api, root_uri), args.pk + "/")
-                    resp = api.get(gigs_uri)
-                    print_instance(resp, args.json)
+                    retrieve_func(api, gigs_uri, args.pk, args.json)
 
                 elif args.action == "create":
-                    gigs_uri = get_gigs_uri(api, root_uri)
-                    input_data = json.loads(args.data)
-                    resp = api.post(gigs_uri, input_data)
-                    pprint(resp)
+                    create_func(api, gigs_uri, keys, args.resource)
 
                 elif args.action == "update":
-                    gigs_uri = urljoin(get_gigs_uri(api, root_uri), args.pk + "/")
-                    input_data = json.loads(args.data)
-                    resp = api.put(gigs_uri, input_data)
+                    update_func(api, gigs_uri, args.pk, keys)
 
                 elif args.action == "delete":
-                    gigs_uri = urljoin(get_gigs_uri(api, root_uri), args.pk + "/")
-                    resp = api.delete(gigs_uri)
+                    delete_func(api, gigs_uri, args.pk)
 
                 elif args.action == "filter":
-                    gigs_uri = urljoin(get_gigs_uri(api, root_uri), args.data)
-                    resp = api.get(gigs_uri)
-                    print_instance(resp, args.json)
+                    filter_func(api, gigs_uri, keys, args.resource, args.json)
 
 
 if __name__ == "__main__":
