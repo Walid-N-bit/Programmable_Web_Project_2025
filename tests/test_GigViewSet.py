@@ -5,22 +5,23 @@ https://www.django-rest-framework.org/api-guide/testing/#api-test-cases
 """
 
 import os
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-import django
-
-django.setup()
-
 from datetime import datetime, timedelta
 
+import django
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from gigwork.views import Gig, Posting, User
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 
 class GigTests(APITestCase):
+    """
+    Test the GigViewSet.
+    """
+
     def setUp(self):
         self.client = APIClient()
         self.user1 = User.objects.create(
@@ -28,7 +29,7 @@ class GigTests(APITestCase):
         )
         self.user2 = User.objects.create(
             first_name="first_name2", last_name="last_name2", email="test2@mail.com"
-        )
+        )  # pylint: disable=duplicate-code
         self.posting = Posting.objects.create(
             title="title",
             description="This is a description for the test posting",
@@ -68,7 +69,7 @@ class GigTests(APITestCase):
     def test_gigs_create(self):
         url = "/gigwork/api/gigs/"
         new_posting = Posting.objects.create(
-            title="title",
+            title="title",  # pylint: disable=duplicate-code
             description="This is a description for the test posting",
             expires_at=datetime.now().date() + timedelta(days=7),
             price=100.00,

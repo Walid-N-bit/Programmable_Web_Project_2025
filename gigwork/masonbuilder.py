@@ -1,3 +1,8 @@
+"""
+:)
+"""
+
+
 class MasonBuilder(dict):
     """
     A convenience class for managing dictionaries that represent Mason

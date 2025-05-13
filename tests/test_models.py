@@ -1,18 +1,23 @@
+"""
+Populate the database with sample data for testing purposes.
+"""
+
 import os
-
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
-
 from datetime import datetime, timedelta
 
+import django
 from django.test import TestCase
 
 from gigwork.models import Gig, Posting, User
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 
 class GigworkTests(TestCase):
+    """
+    Test the Gigwork models.
+    """
 
     def setUp(self):
         # Create necessary datetime objects
@@ -43,7 +48,7 @@ class GigworkTests(TestCase):
             email="employee1@asd.com",
             phone_number="1234567890",
         )
-        user4 = User.objects.create(
+        User.objects.create(
             first_name="user four",
             last_name="user four",
             email="employee2@asd.com",
@@ -51,7 +56,7 @@ class GigworkTests(TestCase):
         )
 
         # Create Postings
-        posting1 = Posting.objects.create(
+        Posting.objects.create(
             title="Posting One",
             description="Hey you, you're finally awake.",
             owner=user1,
@@ -69,7 +74,7 @@ class GigworkTests(TestCase):
         )
         posting3 = Posting.objects.create(
             title="Posting Three",
-            description="Walked right into that Imperial ambush, same as us, and that thief over there.",
+            description="Walked right into that Imperial ambush, same as us and that thief there.",
             owner=user3,
             expires_at=week_ahead,
             price=300.00,
@@ -77,14 +82,14 @@ class GigworkTests(TestCase):
         )
 
         # Create Gigs
-        gig1 = Gig.objects.create(
+        Gig.objects.create(
             owner=user1,
             posting=posting2,
             start_date=week_ago,
             end_date=now,
             status="completed",
         )
-        gig2 = Gig.objects.create(
+        Gig.objects.create(
             owner=user2,
             posting=posting3,
             start_date=week_ago,
@@ -105,6 +110,6 @@ class GigworkTests(TestCase):
         self.assertEqual(gigs.count(), 2)
 
     def test__str__(self):
-        self.assertEqual(User.objects.get(id=1).__str__(), "User One User One")
-        self.assertEqual(Posting.objects.get(id=1).__str__(), "Posting One")
-        self.assertEqual(Gig.objects.get(id=1).__str__(), "Posting Two")
+        self.assertEqual(str(User.objects.get(id=1)), "User One User One")
+        self.assertEqual(str(Posting.objects.get(id=1)), "Posting One")
+        self.assertEqual(str(Gig.objects.get(id=1)), "Posting Two")

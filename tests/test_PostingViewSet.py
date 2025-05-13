@@ -5,30 +5,31 @@ https://www.django-rest-framework.org/api-guide/testing/#api-test-cases
 """
 
 import os
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-import django
-
-django.setup()
-
 from datetime import datetime, timedelta
 
+import django
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient, APITestCase, force_authenticate
+from rest_framework.test import APIClient, APITestCase
 
 from gigwork.views import Posting, User
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 
 class PostingTests(APITestCase):
+    """
+    Test the PostingViewSet.
+    """
+
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create(
             first_name="first_name", last_name="last_name", email="test@mail.com"
-        )
+        )  # pylint: disable=duplicate-code
 
         self.posting = Posting.objects.create(
-            title="title",
+            title="title",  # pylint: disable=duplicate-code
             description="This is a description for the test posting",
             expires_at=datetime.now().date() + timedelta(days=7),
             price=100.00,

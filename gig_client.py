@@ -14,15 +14,16 @@ https://www.geeksforgeeks.org/python-unpack-list/
 https://www.geeksforgeeks.org/python-ways-to-convert-string-to-json-object/
 https://www.geeksforgeeks.org/python-program-to-remove-last-character-from-the-string/
 """
-import os
+
 import argparse
-import json
+import os
 from urllib.parse import urljoin
-from yaml import safe_load
+
 import requests
 from rich.console import Console
 from rich.pretty import pprint
 from rich.table import Table
+from yaml import safe_load
 
 API_ROOT = "gigwork/api/root/"
 
@@ -133,10 +134,20 @@ def list_table(data, res):
     """
     table = Table(title=f"List of {res}", show_lines=True)
     items = data.get("items")
-    colors = ['white', 'red', 'yellow',
-              'green', 'blue', 'cyan',
-              'magenta', 'purple', 'green',
-              'blue', 'cyan', 'yellow']
+    colors = [
+        "white",
+        "red",
+        "yellow",
+        "green",
+        "blue",
+        "cyan",
+        "magenta",
+        "purple",
+        "green",
+        "blue",
+        "cyan",
+        "yellow",
+    ]
     for key, color in zip(items[0].keys(), colors):
         table.add_column(key, justify="left", no_wrap=False, style=color)
     for item in items:
@@ -190,33 +201,36 @@ def create_token_file(resp):
     with open(".token", "w", encoding="utf-8") as file:
         file.write(f"Token {resp.get('Token', '')}")
 
+
 def get_resource_keys(client, uri, resource):
     """
     return list of keys for the given resource model
     """
     schema = client.get_schema(uri)
-    schemas = schema.get('components', {}).get('schemas', {})
+    schemas = schema.get("components", {}).get("schemas", {})
     props = {}
     if resource == "users":
-        props = schemas.get('User').get('properties', {})
+        props = schemas.get("User").get("properties", {})
     elif resource == "postings":
-        props = schemas.get('Posting').get('properties', {})
+        props = schemas.get("Posting").get("properties", {})
     elif resource == "gigs":
-        props = schemas.get('Gig').get('properties', {})
+        props = schemas.get("Gig").get("properties", {})
 
     keys = list(props.keys())
     auto_fields = [
-        'id',
-        'owner',
-        'created_at',
-        'expires_at',
-        'start_date',
-        'end_date',
-        '@controls']
+        "id",
+        "owner",
+        "created_at",
+        "expires_at",
+        "start_date",
+        "end_date",
+        "@controls",
+    ]
     for field in auto_fields:
         if field in keys:
             keys.remove(field)
     return keys
+
 
 def data_input(keys):
     """
@@ -229,13 +243,14 @@ def data_input(keys):
         if value:
             data[key] = value
 
-    price = data.get('price')
+    price = data.get("price")
     if price:
-        data['price'] = float(price)
-    posting = data.get('posting')
+        data["price"] = float(price)
+    posting = data.get("posting")
     if posting:
-        data['posting'] = int(posting)
+        data["posting"] = int(posting)
     return data
+
 
 def filter_data_str(data, keys):
     """
@@ -272,7 +287,7 @@ def create_func(client, uri, keys, res):
     """
     input_data = data_input(keys)
     response = client.post(uri, input_data)
-    if res == 'users':
+    if res == "users":
         create_token_file(response)
     pprint(response)
 
@@ -359,11 +374,10 @@ def main():
 
                 elif args.action == "delete":
                     delete_func(api, users_uri, args.pk)
-                    os.remove('.token')
+                    os.remove(".token")
 
                 elif args.action == "filter":
                     filter_func(api, users_uri, keys, args.resource, args.json)
-
 
             elif args.resource == "postings":
                 keys = get_resource_keys(api, schema_uri, args.resource)
@@ -385,7 +399,6 @@ def main():
 
                 elif args.action == "filter":
                     filter_func(api, postings_uri, keys, args.resource, args.json)
-
 
             elif args.resource == "gigs":
                 keys = get_resource_keys(api, schema_uri, args.resource)
