@@ -1,11 +1,15 @@
-from datetime import datetime, timedelta
+"""
+Database models for the Gigwork application.
+"""
 
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
+    """
+    Custom user model that uses email as the unique identifier.
+    """
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -21,6 +25,10 @@ class User(AbstractUser):
 
 
 class Posting(models.Model):
+    """
+    Model representing a job posting.
+    """
+
     title = models.CharField(max_length=100)
     description = models.TextField()
     owner = models.ForeignKey(
@@ -41,6 +49,10 @@ class Posting(models.Model):
 
 
 class Gig(models.Model):
+    """
+    Model representing a gig (job) associated with a posting.
+    """
+
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -1,17 +1,23 @@
+"""
+Populate the database with sample data for testing purposes.
+"""
+
 import os
+from datetime import datetime, timedelta
 
 import django
+
+from gigwork.models import Gig, Posting, User
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from datetime import datetime, timedelta
-
-from gigwork.models import Gig, Posting, User
-
 
 def populate_db():
+    """
+    Populate the database with sample data for testing purposes.
+    """
     week_ago = datetime.now() - timedelta(days=7)
     week_ahead = datetime.now() + timedelta(days=7)
     now = datetime.now()
@@ -57,15 +63,15 @@ def populate_db():
     )
 
     # Create Gigs
-    gig1 = Gig.objects.create(
+    Gig.objects.create(
         owner=user_objs[2],  # Clark Kent
         posting=posting1,
         start_date=week_ago,
         end_date=now,
         status="completed",
-    )
+    )  # pylint: disable=duplicate-code
 
-    gig2 = Gig.objects.create(
+    Gig.objects.create(
         owner=user_objs[3],  # Diana Prince
         posting=posting2,
         start_date=week_ago,

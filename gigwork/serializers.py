@@ -9,10 +9,7 @@ https://www.django-rest-framework.org/api-guide/relations/#nested-relationships
 https://www.django-rest-framework.org/api-guide/relations/#primarykeyrelatedfield
 """
 
-from decimal import Decimal
-
-from django.http import JsonResponse
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from gigwork.models import Gig, Posting, User

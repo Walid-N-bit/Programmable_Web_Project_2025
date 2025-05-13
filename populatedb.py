@@ -1,17 +1,23 @@
+"""
+This script populates the database with sample data for testing purposes.
+"""
+
 import os
+from datetime import datetime, timedelta
 
 import django
+
+from gigwork.models import Gig, Posting, User
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from datetime import datetime, timedelta
-
-from gigwork.models import Gig, Posting, User
-
 
 def populate_db():
+    """
+    Populate the database with sample data for testing purposes.
+    """
     # Create necessary datetime objects
     week_ago = datetime.now().date() - timedelta(days=7)
     week_ahead = datetime.now().date() + timedelta(days=7)
@@ -43,7 +49,7 @@ def populate_db():
         phone_number="1234567890",
         role="employee",
     )
-    user4 = User.objects.create(
+    User.objects.create(
         first_name="Alphonse",
         last_name="Elric",
         email="employee2@asd.com",
@@ -52,7 +58,7 @@ def populate_db():
     )
 
     # Create Postings
-    posting1 = Posting.objects.create(
+    Posting.objects.create(
         title="Posting One",
         description="Hey you, you're finally awake.",
         user=user1,
@@ -60,17 +66,17 @@ def populate_db():
         price=100.00,
         status="open",
     )
-    posting2 = Posting.objects.create(
+    Posting.objects.create(
         title="Posting Two",
         description="You were trying to cross the border, right?",
         user=user2,
-        expires_at=week_ago,
+        expires_at=week_ago,  # pylint: disable=duplicate-code
         price=200.00,
         status="expired",
     )
     posting3 = Posting.objects.create(
         title="Posting Three",
-        description="Walked right into that Imperial ambush, same as us, and that thief over there.",
+        description="Walked right into that Imperial ambush, same as us, and that thief there.",
         user=user3,
         expires_at=week_ahead,
         price=300.00,
@@ -78,7 +84,7 @@ def populate_db():
     )
 
     # Create Gigs
-    gig1 = Gig.objects.create(
+    Gig.objects.create(
         title="Gig One",
         description="For the Emperor!",
         user=user1,
@@ -87,7 +93,7 @@ def populate_db():
         price=100.00,
         status="completed",
     )
-    gig2 = Gig.objects.create(
+    Gig.objects.create(
         title="Gig Two",
         description="Damn you Stormcloaks. Skyrim was fine until you came along.",
         user=user2,

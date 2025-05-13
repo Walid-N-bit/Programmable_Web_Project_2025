@@ -6,21 +6,21 @@ https://www.django-rest-framework.org/api-guide/testing/#api-test-cases
 
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
-
-django.setup()
-
-import json
-
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient, APITestCase, force_authenticate
+from rest_framework.test import APIClient, APITestCase
 
 from gigwork.views import User
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 
 class UserTests(APITestCase):
+    """
+    Test the UserViewSet.
+    """
+
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create(

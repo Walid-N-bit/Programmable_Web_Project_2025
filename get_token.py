@@ -1,13 +1,12 @@
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
-
-django.setup()
-
 from rest_framework.authtoken.models import Token
 
 from gigwork.models import User
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
 
 for user in User.objects.all():
     token = Token.objects.get(user=user)

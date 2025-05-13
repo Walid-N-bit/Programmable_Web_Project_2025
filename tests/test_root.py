@@ -6,16 +6,19 @@ https://www.django-rest-framework.org/api-guide/testing/#api-test-cases
 
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
-
-django.setup()
-
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 
 class APIRootTests(APITestCase):
+    """
+    Test the API root view.
+    """
+
     def setUp(self):
         self.client = APIClient()
         return super().setUp()

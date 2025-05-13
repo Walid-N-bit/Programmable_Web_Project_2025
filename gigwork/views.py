@@ -38,8 +38,12 @@ from gigwork.serializers import (GigSerializer, PostingSerializer,
                                  UserSerializer)
 
 
-class JsonSchemaMixin:
-    def json_schema_validation(self, request, *args, **kwargs):
+class JsonSchemaMixin:  # pylint: disable=too-few-public-methods
+    """
+    Mixin to add JSON schema validation to viewsets.
+    """
+
+    def json_schema_validation(self, request):
         if request.content_type != "application/json":
             raise UnsupportedMediaType(request.content_type)
         try:
@@ -105,10 +109,10 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         being blocked by the authentication and permission schemes.
         """
         if self.action == "create":
-            permission_classes = []
+            permission_class_list = []
         else:
-            permission_classes = [permissions.IsAuthenticated, IsSelfOrReadOnly]
-        return [permission() for permission in permission_classes]
+            permission_class_list = [permissions.IsAuthenticated, IsSelfOrReadOnly]
+        return [permission() for permission in permission_class_list]
 
     authentication_classes = [TokenAuthentication]
 
@@ -228,7 +232,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         response = super().list(request)
         body = MasonBuilder(items=[])
         for posting in response.data:
@@ -256,8 +260,8 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None, *args, **kwargs):
-        response = super().retrieve(request, pk=None)
+    def retrieve(self, request, pk=None):
+        response = super().retrieve(request, pk)
         body = MasonBuilder(response.data)
         self_url = reverse("postings-detail", kwargs={"pk": response.data["id"]})
         body.add_control("self", self_url)
