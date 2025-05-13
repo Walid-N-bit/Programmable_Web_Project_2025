@@ -12,6 +12,7 @@ https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
 https://www.django-rest-framework.org/api-guide/views/
 https://www.django-rest-framework.org/api-guide/permissions/#api-reference
 """
+
 # standard library
 from jsonschema import validate, ValidationError
 
@@ -36,6 +37,7 @@ from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
 from gigwork.models import User, Gig, Posting
 from gigwork.custom_permissions import IsOwnerOrReadOnly
 
+
 class JsonSchemaMixin:
     def create(self, request, *args, **kwargs):
         try:
@@ -45,7 +47,7 @@ class JsonSchemaMixin:
             raise ParseError(detail=str(e)) from e
 
     def update(self, request, *args, **kwargs):
-        if request.content_type != 'application/json':
+        if request.content_type != "application/json":
             raise UnsupportedMediaType
         try:
             validate(request.data, self.json_schema())
@@ -53,15 +55,21 @@ class JsonSchemaMixin:
         except ValidationError as e:
             raise ParseError(detail=str(e)) from e
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def api_root(request):
-    return JsonResponse({"@controls": {
-        "self": {"href": reverse('api-root', request=request)},
-        "users": {"href": reverse('users-list', request=request)},
-        "postings": {"href": reverse('postings-list', request=request)},
-        "gigs": {"href": reverse('gigs-list', request=request)},
-    }})
+    return JsonResponse(
+        {
+            "@controls": {
+                "self": {"href": reverse("api-root", request=request)},
+                "users": {"href": reverse("users-list", request=request)},
+                "postings": {"href": reverse("postings-list", request=request)},
+                "gigs": {"href": reverse("gigs-list", request=request)},
+            }
+        }
+    )
+
 
 class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
@@ -69,34 +77,32 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     this viewset provides default actions inherited from 'ModelViewSet',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
     """
-    queryset = User.objects.all().order_by('id')
+
+    queryset = User.objects.all().order_by("id")
     serializer_class = UserSerializer
-    filterset_fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'address']
+    filterset_fields = [
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone_number",
+        "address",
+    ]
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
     @staticmethod
     def json_schema():
         schema = {
-            "type":"object",
-            "required":["first_name", "last_name", "email"],
-            "properties":{
-                "first_name":{
-                    "type":"string"
-                },
-                "last_name":{
-                    "type":"string"
-                },
-                "email":{
-                    "type":"string"
-                },
-                "phone_number":{
-                    "type":"string"
-                },
-                "address":{
-                    "type":"string"
-                },
-            }
+            "type": "object",
+            "required": ["first_name", "last_name", "email"],
+            "properties": {
+                "first_name": {"type": "string"},
+                "last_name": {"type": "string"},
+                "email": {"type": "string"},
+                "phone_number": {"type": "string"},
+                "address": {"type": "string"},
+            },
         }
         return schema
 
@@ -105,18 +111,19 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         The purpose of this method is to allow for creating new users without
         being blocked by the authentication and permission schemes.
         """
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = []
         else:
             permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
         return [permission() for permission in permission_classes]
+
     authentication_classes = [TokenAuthentication]
 
     # permission_classes = []
     # authentication_classes = []
 
     def get_object(self):
-        obj = Posting.objects.get(pk = self.kwargs['pk'])
+        obj = Posting.objects.get(pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -128,21 +135,23 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         for user in response.data:
             # return JsonResponse(user, safe=False)
             item = MasonBuilder(user)
-            self_url = reverse('users-detail', kwargs={'pk': user['id']})
+            self_url = reverse("users-detail", kwargs={"pk": user["id"]})
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        base_url = request.build_absolute_uri(reverse('users-list'))
+        base_url = request.build_absolute_uri(reverse("users-list"))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter users by field",
-                         href=base_url
-                         + "{?id,first_name,last_name,email,phone_number,address}")
+        body.add_control(
+            ctrl_name="filter users by field",
+            href=base_url + "{?id,first_name,last_name,email,phone_number,address}",
+        )
 
-        body.add_control_post(ctrl_name='user: create',
-                               title='add a new user',
-                               href=request.build_absolute_uri(),
-                               schema=UserViewSet.json_schema()
-                               )
+        body.add_control_post(
+            ctrl_name="user: create",
+            title="add a new user",
+            href=request.build_absolute_uri(),
+            schema=UserViewSet.json_schema(),
+        )
 
         return JsonResponse(body)
 
@@ -151,17 +160,16 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         response = super().retrieve(request, pk=None)
         body = MasonBuilder(response.data)
-        self_url = reverse('users-detail', kwargs={'pk': response.data['id']})
+        self_url = reverse("users-detail", kwargs={"pk": response.data["id"]})
 
         body.add_control("self", self_url)
 
-        body.add_control_put(title='update existing user',
-                             href=self_url,
-                             schema=UserViewSet.json_schema()
-                             )
-        body.add_control_delete(title='remove a user',
-                                href=self_url
-                                )
+        body.add_control_put(
+            title="update existing user",
+            href=self_url,
+            schema=UserViewSet.json_schema(),
+        )
+        body.add_control_delete(title="remove a user", href=self_url)
         return JsonResponse(body)
 
     def create(self, request):
@@ -176,16 +184,26 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         token = Token.objects.create(user=user)
         return JsonResponse({"Token": token.key}, status=status.HTTP_201_CREATED)
 
+
 class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
     API endpoint to view and edit postings
     this viewset provides default actions inherited from 'ModelViewset',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
     """
-    queryset = Posting.objects.all().order_by('status')
+
+    queryset = Posting.objects.all().order_by("status")
     serializer_class = PostingSerializer
-    filterset_fields = ['id', 'title', 'description', 'owner', 'created_at',
-                        'expires_at', 'price', 'status']
+    filterset_fields = [
+        "id",
+        "title",
+        "description",
+        "owner",
+        "created_at",
+        "expires_at",
+        "price",
+        "status",
+    ]
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
@@ -197,33 +215,21 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @staticmethod
     def json_schema():
         schema = {
-            "type":"object",
-            "required":["title", "description", "price"],
-            "properties":{
-                "title":{
-                    "type":"string"
-                },
-                "description":{
-                    "type":"string"
-                },
-                "created_at":{
-                    "type":"string"
-                },
-                "expires_at":{
-                    "type":"string"
-                },
-                "price":{
-                    "type":"number"
-                },
-                "status":{
-                    "type":"string"
-                },
-            }
+            "type": "object",
+            "required": ["title", "description", "price"],
+            "properties": {
+                "title": {"type": "string"},
+                "description": {"type": "string"},
+                "created_at": {"type": "string"},
+                "expires_at": {"type": "string"},
+                "price": {"type": "number"},
+                "status": {"type": "string"},
+            },
         }
         return schema
 
     def get_object(self):
-        obj = Posting.objects.get(pk = self.kwargs['pk'])
+        obj = Posting.objects.get(pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -234,22 +240,24 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         body = MasonBuilder(items=[])
         for posting in response.data:
             item = MasonBuilder(posting)
-            self_url = reverse('postings-detail', kwargs={'pk': posting['id']})
+            self_url = reverse("postings-detail", kwargs={"pk": posting["id"]})
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        base_url = request.build_absolute_uri(reverse('postings-list'))
+        base_url = request.build_absolute_uri(reverse("postings-list"))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter postings by field",
-                         href=base_url+
-                         "{?id, title, description, owner, created_at,"
-                         "expires_at, price, status}")
+        body.add_control(
+            ctrl_name="filter postings by field",
+            href=base_url + "{?id, title, description, owner, created_at,"
+            "expires_at, price, status}",
+        )
 
-        body.add_control_post(ctrl_name='posting: create',
-                               title='add a new posting',
-                               href=base_url,
-                               schema=PostingViewSet.json_schema()
-                               )
+        body.add_control_post(
+            ctrl_name="posting: create",
+            title="add a new posting",
+            href=base_url,
+            schema=PostingViewSet.json_schema(),
+        )
 
         return JsonResponse(body)
 
@@ -258,34 +266,35 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)
         body = MasonBuilder(response.data)
-        self_url = reverse('postings-detail', kwargs={'pk': response.data['id']})
+        self_url = reverse("postings-detail", kwargs={"pk": response.data["id"]})
         body.add_control("self", self_url)
-        body.add_control_put(title='update existing posting',
-                             href=self_url,
-                             schema=PostingViewSet.json_schema()
-                             )
-        body.add_control_delete(title='remove a posting',
-                                href=self_url
-                                )
+        body.add_control_put(
+            title="update existing posting",
+            href=self_url,
+            schema=PostingViewSet.json_schema(),
+        )
+        body.add_control_delete(title="remove a posting", href=self_url)
         return JsonResponse(body)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        serializer = PostingSerializer(data= request.data)
+        serializer = PostingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return JsonResponse({"result":"posting added successfully."},
-                            status=status.HTTP_201_CREATED)
+        return JsonResponse(
+            {"result": "posting added successfully."}, status=status.HTTP_201_CREATED
+        )
 
     def update(self, request, pk=None, *args, **kwargs):
 
         posting = self.get_object()
-        serializer = PostingSerializer(posting, data= request.data)
+        serializer = PostingSerializer(posting, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return JsonResponse({"result":"posting updated"}, status=status.HTTP_200_OK)
+        return JsonResponse({"result": "posting updated"}, status=status.HTTP_200_OK)
+
 
 class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     """
@@ -293,10 +302,10 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     this viewset provides default actions inherited from 'ModelViewset',
     theses are: 'list', 'create', 'destroy', 'retrieve', 'update'.
     """
-    queryset = Gig.objects.all().order_by('status')
+
+    queryset = Gig.objects.all().order_by("status")
     serializer_class = GigSerializer
-    filterset_fields = ['id', 'owner',
-                        'start_date', 'end_date', 'status']
+    filterset_fields = ["id", "owner", "start_date", "end_date", "status"]
     renderer_classes = [JSONRenderer]
     parser_classes = [JSONParser]
 
@@ -308,22 +317,14 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @staticmethod
     def json_schema():
         schema = {
-            "type":"object",
+            "type": "object",
             "required": ["posting"],
-            "properties":{
-                "posting":{
-                    "type": "number"
-                    },
-                "start_date":{
-                    "type":"string"
-                },
-                "end_date":{
-                    "type":"string"
-                },
-                "status":{
-                    "type":"string"
-                },
-            }
+            "properties": {
+                "posting": {"type": "number"},
+                "start_date": {"type": "string"},
+                "end_date": {"type": "string"},
+                "status": {"type": "string"},
+            },
         }
         return schema
 
@@ -334,21 +335,23 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         body = MasonBuilder(items=[])
         for gig in response.data:
             item = MasonBuilder(gig)
-            self_url = reverse('gigs-detail', kwargs={'pk': gig['id']})
+            self_url = reverse("gigs-detail", kwargs={"pk": gig["id"]})
             item.add_control("self", self_url)
             body["items"].append(item)
 
-        base_url = request.build_absolute_uri(reverse('gigs-list'))
+        base_url = request.build_absolute_uri(reverse("gigs-list"))
         body.add_control("self", base_url)
-        body.add_control(ctrl_name="filter gigs by field",
-                         href=base_url
-                         + "{?id, owner, posting, start_date, end_date, status}")
+        body.add_control(
+            ctrl_name="filter gigs by field",
+            href=base_url + "{?id, owner, posting, start_date, end_date, status}",
+        )
 
-        body.add_control_post(ctrl_name='gig: create',
-                               title='add a new gig',
-                               href=base_url,
-                               schema=GigViewSet.json_schema()
-                               )
+        body.add_control_post(
+            ctrl_name="gig: create",
+            title="add a new gig",
+            href=base_url,
+            schema=GigViewSet.json_schema(),
+        )
         return JsonResponse(body)
 
     # @method_decorator(cache_page(60 * 5))
@@ -356,24 +359,21 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     def retrieve(self, request, pk=None, *args, **kwargs):
         response = super().retrieve(request, pk=None)
         body = MasonBuilder(response.data)
-        self_url = reverse('gigs-detail', kwargs={'pk': response.data['id']})
+        self_url = reverse("gigs-detail", kwargs={"pk": response.data["id"]})
         body.add_control("self", self_url)
-        body.add_control_put(title='update existing gig',
-                             href=self_url,
-                             schema=GigViewSet.json_schema()
-                             )
-        body.add_control_delete(title='remove a gig',
-                                href=self_url
-                                )
+        body.add_control_put(
+            title="update existing gig", href=self_url, schema=GigViewSet.json_schema()
+        )
+        body.add_control_delete(title="remove a gig", href=self_url)
         return JsonResponse(body)
 
     def perform_create(self, serializer):
         gig = serializer.save(owner=self.request.user)
-        gig.posting.status = 'accepted'
+        gig.posting.status = "accepted"
         gig.posting.save()
 
     def create(self, request, *args, **kwargs):
-        serializer = GigSerializer(data= request.data)
+        serializer = GigSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         self.perform_create(serializer)
@@ -383,7 +383,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         gig = self.get_object()
-        serializer = GigSerializer(gig, data= request.data)
+        serializer = GigSerializer(gig, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return JsonResponse({"result": "gig updated"}, status=status.HTTP_200_OK)

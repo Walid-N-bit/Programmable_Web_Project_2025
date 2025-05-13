@@ -5,7 +5,7 @@ class MasonBuilder(dict):
     elements into the object but mostly is just a parent for the much more
     useful subclass defined next. This class is generic in the sense that it
     does not contain any application specific implementation details.
-    
+
     Note that child classes should set the *DELETE_RELATION* to the application
     specific relation name from the application namespace. The IANA standard
     does not define a link relation for deleting something.
@@ -41,9 +41,7 @@ class MasonBuilder(dict):
         if "@namespaces" not in self:
             self["@namespaces"] = {}
 
-        self["@namespaces"][ns] = {
-            "name": uri
-        }
+        self["@namespaces"][ns] = {"name": uri}
 
     def add_control(self, ctrl_name, href, **kwargs):
         """
@@ -62,26 +60,21 @@ class MasonBuilder(dict):
 
         self["@controls"][ctrl_name] = kwargs
         self["@controls"][ctrl_name]["href"] = href
-        
+
     def add_control_post(self, ctrl_name, title, href, schema):
         """
         Utility method for adding POST type controls. The control is
         constructed from the method's parameters. Method and encoding are
         fixed to "POST" and "json" respectively.
-        
+
         : param str ctrl_name: name of the control (including namespace if any)
         : param str href: target URI for the control
         : param str title: human-readable title for the control
         : param dict schema: a dictionary representing a valid JSON schema
         """
-    
+
         self.add_control(
-            ctrl_name,
-            href,
-            method="POST",
-            encoding="json",
-            title=title,
-            schema=schema
+            ctrl_name, href, method="POST", encoding="json", title=title, schema=schema
         )
 
     def add_control_put(self, title, href, schema):
@@ -89,21 +82,16 @@ class MasonBuilder(dict):
         Utility method for adding PUT type controls. The control is
         constructed from the method's parameters. Control name, method and
         encoding are fixed to "edit", "PUT" and "json" respectively.
-        
+
         : param str href: target URI for the control
         : param str title: human-readable title for the control
         : param dict schema: a dictionary representing a valid JSON schema
         """
 
         self.add_control(
-            "edit",
-            href,
-            method="PUT",
-            encoding="json",
-            title=title,
-            schema=schema
+            "edit", href, method="PUT", encoding="json", title=title, schema=schema
         )
-        
+
     def add_control_delete(self, title, href):
         """
         Utility method for adding PUT type controls. The control is
@@ -114,7 +102,7 @@ class MasonBuilder(dict):
         : param str href: target URI for the control
         : param str title: human-readable title for the control
         """
-        
+
         self.add_control(
             "mumeta:delete",
             href,

@@ -8,6 +8,7 @@ django.setup()
 from datetime import datetime, timedelta
 from gigwork.models import User, Posting, Gig
 
+
 def populate_db():
     week_ago = datetime.now() - timedelta(days=7)
     week_ahead = datetime.now() + timedelta(days=7)
@@ -41,7 +42,7 @@ def populate_db():
         owner=user_objs[0],  # Tony Stark
         expires_at=week_ahead,
         price=120.00,
-        status="open"
+        status="open",
     )
 
     posting2 = Posting.objects.create(
@@ -50,7 +51,7 @@ def populate_db():
         owner=user_objs[1],  # Bruce Wayne
         expires_at=week_ago,
         price=90.00,
-        status="expired"
+        status="expired",
     )
 
     # Create Gigs
@@ -59,7 +60,7 @@ def populate_db():
         posting=posting1,
         start_date=week_ago,
         end_date=now,
-        status="completed"
+        status="completed",
     )
 
     gig2 = Gig.objects.create(
@@ -67,9 +68,10 @@ def populate_db():
         posting=posting2,
         start_date=week_ago,
         end_date=week_ahead,
-        status="in_progress"
+        status="in_progress",
     )
 
     print("Database populated successfully.")
+
 
 populate_db()

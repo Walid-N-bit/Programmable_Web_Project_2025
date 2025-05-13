@@ -1,11 +1,13 @@
 import os
 import django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from datetime import datetime, timedelta
 from django.test import TestCase
 from gigwork.models import Gig, User, Posting
+
 
 class GigworkTests(TestCase):
 
@@ -22,7 +24,6 @@ class GigworkTests(TestCase):
             email="customer1@asd.com",
             phone_number="1234567890",
             address="Testitie 12, 90500 Oulu",
-
         )
         user2 = User.objects.create(
             first_name="User Two",
@@ -30,7 +31,6 @@ class GigworkTests(TestCase):
             email="customer2@asd.com",
             phone_number="0987654321",
             address="Testitie 13, 90520 Oulu",
-
         )
 
         # Create Employees
@@ -100,8 +100,8 @@ class GigworkTests(TestCase):
     def test_gig_count(self):
         gigs = Gig.objects.all()
         self.assertEqual(gigs.count(), 2)
-    
+
     def test__str__(self):
-        self.assertEqual(User.objects.get(id=1).__str__(), 'User One User One')
-        self.assertEqual(Posting.objects.get(id=1).__str__(), 'Posting One')
-        self.assertEqual(Gig.objects.get(id=1).__str__(), 'Posting Two')
+        self.assertEqual(User.objects.get(id=1).__str__(), "User One User One")
+        self.assertEqual(Posting.objects.get(id=1).__str__(), "Posting One")
+        self.assertEqual(Gig.objects.get(id=1).__str__(), "Posting Two")

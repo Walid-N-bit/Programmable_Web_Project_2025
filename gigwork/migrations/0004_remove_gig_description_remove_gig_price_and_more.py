@@ -7,35 +7,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gigwork', '0003_alter_posting_expires_at_alter_posting_status'),
+        ("gigwork", "0003_alter_posting_expires_at_alter_posting_status"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='gig',
-            name='description',
+            model_name="gig",
+            name="description",
         ),
         migrations.RemoveField(
-            model_name='gig',
-            name='price',
+            model_name="gig",
+            name="price",
         ),
         migrations.RemoveField(
-            model_name='gig',
-            name='title',
+            model_name="gig",
+            name="title",
         ),
         migrations.AddField(
-            model_name='gig',
-            name='posting',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL, to='gigwork.posting'),
+            model_name="gig",
+            name="posting",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="gigwork.posting",
+            ),
         ),
         migrations.AlterField(
-            model_name='gig',
-            name='start_date',
+            model_name="gig",
+            name="start_date",
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='gig',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('in_progress', 'In Progress'), ('completed', 'Completed')], default='pending', max_length=20),
+            model_name="gig",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Pending"),
+                    ("in_progress", "In Progress"),
+                    ("completed", "Completed"),
+                ],
+                default="pending",
+                max_length=20,
+            ),
         ),
     ]

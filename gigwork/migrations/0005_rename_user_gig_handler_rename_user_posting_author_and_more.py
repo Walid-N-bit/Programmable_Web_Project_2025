@@ -6,22 +6,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gigwork', '0004_remove_gig_description_remove_gig_price_and_more'),
+        ("gigwork", "0004_remove_gig_description_remove_gig_price_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='gig',
-            old_name='user',
-            new_name='handler',
+            model_name="gig",
+            old_name="user",
+            new_name="handler",
         ),
         migrations.RenameField(
-            model_name='posting',
-            old_name='user',
-            new_name='author',
+            model_name="posting",
+            old_name="user",
+            new_name="author",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='role',
+            model_name="user",
+            name="role",
         ),
     ]

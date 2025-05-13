@@ -5,25 +5,25 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     address = models.TextField()
     username = None
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
 
 class Posting(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     owner = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        default=0  # Assuming user with ID 1 exists
+        User, on_delete=models.CASCADE, default=0  # Assuming user with ID 1 exists
     )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True)
@@ -31,23 +31,18 @@ class Posting(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[("open", "Open"), ("expired", "Expired"), ("accepted", "Accepted")],
-        default= 'open',
+        default="open",
     )
 
     def __str__(self):
         return self.title
 
+
 class Gig(models.Model):
     owner = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE,
-        default=0  # Assuming user with ID 1 exists
+        User, on_delete=models.CASCADE, default=0  # Assuming user with ID 1 exists
     )
-    posting = models.OneToOneField(
-        Posting,
-        on_delete=models.SET_NULL,
-        null=True
-    )
+    posting = models.OneToOneField(Posting, on_delete=models.SET_NULL, null=True)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True)
     status = models.CharField(
@@ -62,5 +57,3 @@ class Gig(models.Model):
 
     def __str__(self):
         return self.title
-
-
