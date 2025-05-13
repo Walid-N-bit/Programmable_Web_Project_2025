@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gigwork', '0002_remove_user_username'),
+        ("gigwork", "0002_remove_user_username"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='posting',
-            name='expires_at',
+            model_name="posting",
+            name="expires_at",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='posting',
-            name='status',
-            field=models.CharField(choices=[('open', 'Open'), ('expired', 'Expired'), ('accepted', 'Accepted')], default='open', max_length=20),
+            model_name="posting",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("open", "Open"),
+                    ("expired", "Expired"),
+                    ("accepted", "Accepted"),
+                ],
+                default="open",
+                max_length=20,
+            ),
         ),
     ]

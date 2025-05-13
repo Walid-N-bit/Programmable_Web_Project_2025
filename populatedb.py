@@ -1,12 +1,12 @@
 import os
 import django
+
 # Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from gigwork.models import User, Posting, Gig
 from datetime import datetime, timedelta
-
 
 
 def populate_db():
@@ -23,7 +23,6 @@ def populate_db():
         phone_number="1234567890",
         address="Testitie 12, 90500 Oulu",
         role="customer",
-
     )
     user2 = User.objects.create(
         first_name="John",
@@ -32,7 +31,6 @@ def populate_db():
         phone_number="0987654321",
         address="Testitie 13, 90520 Oulu",
         role="customer",
-
     )
 
     # Create Employees
