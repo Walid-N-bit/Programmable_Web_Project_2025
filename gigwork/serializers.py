@@ -46,6 +46,9 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
+        """
+        this inner class specifies the model associated with the serializer
+        """
         model = User
         fields = ["id", "first_name", "last_name"]
 
