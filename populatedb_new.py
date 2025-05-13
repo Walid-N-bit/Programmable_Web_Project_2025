@@ -5,13 +5,12 @@ Populate the database with sample data for testing purposes.
 import os
 from datetime import datetime, timedelta
 
-import django
-
-from gigwork.models import Gig, Posting, User
-
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+import django
 django.setup()
+
+from gigwork.models import Gig, Posting, User
 
 
 def populate_db():

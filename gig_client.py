@@ -20,6 +20,7 @@ import os
 from urllib.parse import urljoin
 
 import requests
+import json
 from rich.console import Console
 from rich.pretty import pprint
 from rich.table import Table
@@ -170,13 +171,16 @@ def retrieve_instance(data):
     return table
 
 
-def print_list(data, res, is_json):
+def print_list(data, res, is_json, output_file=None):
     """
     display list data either in table or json formats
     """
     console = Console()
     if is_json:
         pprint(data)
+    if output_file:
+        with open(output_file, "w+", encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
     else:
         out = list_table(data, res)
         console.print(out)
@@ -264,12 +268,12 @@ def filter_data_str(data, keys):
     return fltr[:-1]
 
 
-def list_func(client, uri, resource, is_json):
+def list_func(client, uri, resource, is_json, output_file=None):
     """
     handler function for list action
     """
     response = client.get(uri)
-    print_list(response, resource, is_json)
+    print_list(response, resource, is_json, output_file)
 
 
 def retrieve_func(client, uri, pk, is_json):
@@ -309,7 +313,7 @@ def delete_func(client, uri, pk):
     client.delete(full_uri)
 
 
-def filter_func(client, uri, keys, resource, is_json):
+def filter_func(client, uri, keys, resource, is_json, output_file=None):
     """
     handler function for filter action
     """
@@ -317,7 +321,7 @@ def filter_func(client, uri, keys, resource, is_json):
     filter_str = filter_data_str(data, keys)
     full_uri = urljoin(uri, filter_str)
     response = client.get(full_uri)
-    print_list(response, resource, is_json)
+    print_list(response, resource, is_json, output_file)
 
 
 def main():
@@ -340,6 +344,11 @@ def main():
         help="Include to print the output in json format."
         "default is printing in table format.",
     )
+    parser.add_argument(
+        "--json_to_file",
+        dest="output_file",
+        help="Include to print the output in json format to a file.",
+    )
     parser.add_argument("--ca", dest="ca", default=None, help="CA certificate file")
     try:
         args = parser.parse_args()
@@ -361,7 +370,7 @@ def main():
                 keys = get_resource_keys(api, schema_uri, args.resource)
                 users_uri = get_users_uri(api, root_uri)
                 if args.action == "list":
-                    list_func(api, users_uri, args.resource, args.json)
+                    list_func(api, users_uri, args.resource, args.json, args.output_file)
 
                 elif args.action == "retrieve":
                     retrieve_func(api, users_uri, args.pk, args.json)
