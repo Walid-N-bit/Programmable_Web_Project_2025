@@ -1,7 +1,8 @@
-from django.db import models
-from django.conf import settings
 from datetime import datetime, timedelta
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
@@ -23,7 +24,7 @@ class Posting(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     owner = models.ForeignKey(
-        User, 
+        User,
         on_delete=models.CASCADE,
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,7 +42,7 @@ class Posting(models.Model):
 
 class Gig(models.Model):
     owner = models.ForeignKey(
-        User, 
+        User,
         on_delete=models.CASCADE,
     )
     posting = models.OneToOneField(Posting, on_delete=models.SET_NULL, null=True)

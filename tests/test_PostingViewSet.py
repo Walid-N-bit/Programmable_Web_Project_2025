@@ -12,9 +12,11 @@ import django
 django.setup()
 
 from datetime import datetime, timedelta
-from rest_framework.test import APITestCase, APIClient, force_authenticate
+
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase, force_authenticate
+
 from gigwork.views import Posting, User
 
 

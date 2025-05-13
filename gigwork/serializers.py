@@ -10,10 +10,12 @@ https://www.django-rest-framework.org/api-guide/relations/#primarykeyrelatedfiel
 """
 
 from decimal import Decimal
-from rest_framework import serializers, status
+
 from django.http import JsonResponse
-from gigwork.models import User, Gig, Posting
+from rest_framework import serializers, status
 from rest_framework.reverse import reverse
+
+from gigwork.models import Gig, Posting, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -61,7 +63,7 @@ class PostingSerializer(serializers.ModelSerializer):
     price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
 
     def to_internal_value(self, data):
-        price = data.get('price')
+        price = data.get("price")
         if price <= 0:
             raise serializers.ValidationError(
                 {"error": "price must be a positive non-zero value"}

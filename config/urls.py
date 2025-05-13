@@ -19,10 +19,11 @@ https://drf-spectacular.readthedocs.io/en/latest/readme.html
 """
 
 from django.contrib import admin
-from django.urls import path, include
-from rest_framework import routers
-from gigwork import views
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework import routers
+
+from gigwork import views
 
 router = routers.DefaultRouter()
 router.register(r"users", views.UserViewSet, basename="users")

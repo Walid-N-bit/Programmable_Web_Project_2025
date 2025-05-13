@@ -13,34 +13,34 @@ https://www.django-rest-framework.org/api-guide/views/
 https://www.django-rest-framework.org/api-guide/permissions/#api-reference
 """
 
-# standard library
-from jsonschema import validate, ValidationError
-
 # Django
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from django.views.decorators.vary import vary_on_headers
 from django.views.decorators.cache import cache_page
-
+from django.views.decorators.vary import vary_on_headers
+# standard library
+from jsonschema import ValidationError, validate
+from rest_framework import permissions, status, viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 # Django rest framework
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.authentication import TokenAuthentication
-from rest_framework import permissions, viewsets, status
+from rest_framework.exceptions import ParseError, UnsupportedMediaType
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import UnsupportedMediaType, ParseError
 from rest_framework.reverse import reverse
 
+from gigwork.custom_permissions import IsOwnerOrReadOnly, IsSelfOrReadOnly
 # local modules
 from gigwork.masonbuilder import MasonBuilder
-from gigwork.serializers import UserSerializer, GigSerializer, PostingSerializer
-from gigwork.models import User, Gig, Posting
-from gigwork.custom_permissions import IsOwnerOrReadOnly, IsSelfOrReadOnly
+from gigwork.models import Gig, Posting, User
+from gigwork.serializers import (GigSerializer, PostingSerializer,
+                                 UserSerializer)
+
 
 class JsonSchemaMixin:
     def json_schema_validation(self, request, *args, **kwargs):
-        if request.content_type != 'application/json':
+        if request.content_type != "application/json":
             raise UnsupportedMediaType(request.content_type)
         try:
             validate(request.data, self.json_schema())
@@ -115,7 +115,7 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     # authentication_classes = []
 
     def get_object(self):
-        obj = User.objects.get(pk = self.kwargs['pk'])
+        obj = User.objects.get(pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -273,7 +273,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         self.json_schema_validation(request, *args, **kwargs)
-        serializer = PostingSerializer(data= request.data)
+        serializer = PostingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return JsonResponse(
@@ -320,12 +320,12 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             },
         }
         return schema
-    
+
     def get_object(self):
-        obj = Gig.objects.get(pk = self.kwargs['pk'])
+        obj = Gig.objects.get(pk=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-    
+
     @method_decorator(cache_page(60 * 5))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
@@ -372,7 +372,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         self.json_schema_validation(request, *args, **kwargs)
-        serializer = GigSerializer(data= request.data)
+        serializer = GigSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return JsonResponse({"result": "gig added"}, status=status.HTTP_201_CREATED)

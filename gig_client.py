@@ -15,11 +15,12 @@ https://www.geeksforgeeks.org/python-ways-to-convert-string-to-json-object/
 """
 
 import argparse
-from urllib.parse import urljoin
 import json
+from urllib.parse import urljoin
+
 import requests
-from rich.pretty import pprint
 from rich.console import Console
+from rich.pretty import pprint
 from rich.table import Table
 
 API_ROOT = "gigwork/api/root/"

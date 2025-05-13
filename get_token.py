@@ -6,6 +6,7 @@ import django
 django.setup()
 
 from rest_framework.authtoken.models import Token
+
 from gigwork.models import User
 
 for user in User.objects.all():

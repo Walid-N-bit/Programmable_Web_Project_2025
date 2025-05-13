@@ -1,12 +1,14 @@
 import os
+
 import django
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from gigwork.models import User, Posting, Gig
 from datetime import datetime, timedelta
+
+from gigwork.models import Gig, Posting, User
 
 
 def populate_db():

@@ -1,12 +1,15 @@
 import os
+
 import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from datetime import datetime, timedelta
+
 from django.test import TestCase
-from gigwork.models import Gig, User, Posting
+
+from gigwork.models import Gig, Posting, User
 
 
 class GigworkTests(TestCase):
