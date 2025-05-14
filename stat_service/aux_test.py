@@ -1,9 +1,14 @@
+"""
+These are the unit tests for the statistics service.
+"""
+
 import json
 from datetime import datetime, timedelta
 
 import pytest
-from main import (combine_statistics, produce_statistics_gigs,
-                  produce_statistics_postings)
+
+from stat_service import (combine_statistics, produce_statistics_gigs,
+                          produce_statistics_postings)
 
 
 @pytest.fixture

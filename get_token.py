@@ -1,3 +1,7 @@
+"""
+This script prints the token for the first user in the database.
+"""
+
 import os
 
 import django

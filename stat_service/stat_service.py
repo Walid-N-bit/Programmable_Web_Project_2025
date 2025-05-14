@@ -21,7 +21,9 @@ def get_stats():
     """
     Endpoint to get the statistics.
     """
-    return send_file(args.output_file, mimetype="application/json")
+    return send_file(
+        args.output_file, mimetype="application/json"
+    )  # pylint: disable=E0606
 
 
 def produce_statistics_gigs(json_data):
@@ -129,10 +131,17 @@ def poll_with_cli_and_build_stats():
         print("Gigs and postings data saved to gigs.json and postings.json")
 
         print("Building statistics...")
-        gig_stats = produce_statistics_gigs(json.load(open("gigs.json")))
-        posting_stats = produce_statistics_postings(json.load(open("postings.json")))
+
+        with open("gigs.json", "r", encoding="utf-8") as f:
+            gigs_data = json.load(f)
+
+        with open("postings.json", "r", encoding="utf-8") as f:
+            postings_data = json.load(f)
+
+        gig_stats = produce_statistics_gigs(gigs_data)
+        posting_stats = produce_statistics_postings(postings_data)
         combined_stats = combine_statistics(gig_stats, posting_stats)
-        with open(args.output_file, "w") as f:
+        with open(args.output_file, "w", encoding="utf-8") as f:
             f.write(combined_stats)
         print(f"Statistics written to {args.output_file}")
         time.sleep(120)

@@ -7,11 +7,12 @@ from datetime import datetime, timedelta
 
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-import django
+import django  # pylint: disable=wrong-import-position
 
 django.setup()
 
-from gigwork.models import Gig, Posting, User
+from gigwork.models import (Gig,  # pylint: disable=wrong-import-position
+                            Posting, User)
 
 
 def populate_db():

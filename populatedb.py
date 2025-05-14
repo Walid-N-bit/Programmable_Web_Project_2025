@@ -6,11 +6,12 @@ import os
 from datetime import datetime, timedelta
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-import django
+import django  # pylint: disable=wrong-import-position
 
 django.setup()
 
-from gigwork.models import Gig, Posting, User
+from gigwork.models import (Gig,  # pylint: disable=wrong-import-position
+                            Posting, User)
 
 
 def populate_db():
@@ -73,7 +74,7 @@ def populate_db():
         price=200.00,
         status="expired",
     )
-    posting3 = Posting.objects.create(
+    Posting.objects.create(
         title="Posting Three",
         description="Walked right into that Imperial ambush, same as us, and that thief there.",
         user=user3,

@@ -1,3 +1,4 @@
+# pylint: skip-file
 """
 CLI client to communicate with the gigwork API.
 it supports GET, POST, PUT, DELETE requests through a set of actions:
