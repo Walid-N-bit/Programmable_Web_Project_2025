@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
+
 django.setup()
 
 from gigwork.models import Gig, Posting, User

@@ -4,20 +4,25 @@ JSON parser for stat service
 
 import argparse
 import json
-import time
-import threading
 import sys
-from flask import Flask, send_file
+import threading
+import time
 from datetime import datetime, timedelta
+
+from flask import Flask, send_file
+
 import gig_client
 
 app = Flask(__name__)
+
+
 @app.route("/stats", methods=["GET"])
 def get_stats():
     """
     Endpoint to get the statistics.
     """
     return send_file(args.output_file, mimetype="application/json")
+
 
 def produce_statistics_gigs(json_data):
     """
@@ -47,6 +52,7 @@ def produce_statistics_gigs(json_data):
     }
 
     return json.dumps(statistics, indent=4)
+
 
 def produce_statistics_postings(json_data):
     """
@@ -82,6 +88,7 @@ def produce_statistics_postings(json_data):
 
     return json.dumps(statistics, indent=4)
 
+
 def combine_statistics(gigs_stats, postings_stats):
     """
     Combine the statistics from gigs and postings into a single JSON object.
@@ -92,6 +99,7 @@ def combine_statistics(gigs_stats, postings_stats):
     }
 
     return json.dumps(combined_stats, indent=4)
+
 
 def poll_with_cli_and_build_stats():
     while True:
@@ -118,12 +126,8 @@ def poll_with_cli_and_build_stats():
         print("Gigs and postings data saved to gigs.json and postings.json")
 
         print("Building statistics...")
-        gig_stats = produce_statistics_gigs(
-            json.load(open("gigs.json"))
-        )
-        posting_stats = produce_statistics_postings(
-            json.load(open("postings.json"))
-        )
+        gig_stats = produce_statistics_gigs(json.load(open("gigs.json")))
+        posting_stats = produce_statistics_postings(json.load(open("postings.json")))
         combined_stats = combine_statistics(gig_stats, posting_stats)
         with open(args.output_file, "w") as f:
             f.write(combined_stats)
@@ -133,14 +137,12 @@ def poll_with_cli_and_build_stats():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Stat Service JSON Parser")
-    parser.add_argument(
-        "server_ip", type=str, help="IP to the server to connect to"
-    )
-    parser.add_argument(
-        "output_file", type=str, help="Path to output JSON file"
-    )
+    parser.add_argument("server_ip", type=str, help="IP to the server to connect to")
+    parser.add_argument("output_file", type=str, help="Path to output JSON file")
     args = parser.parse_args()
 
-    threading.Thread(target=poll_with_cli_and_build_stats, daemon=True,).start()
+    threading.Thread(
+        target=poll_with_cli_and_build_stats,
+        daemon=True,
+    ).start()
     app.run(host="0.0.0.0", port=5000)
-

@@ -16,11 +16,11 @@ https://www.geeksforgeeks.org/python-program-to-remove-last-character-from-the-s
 """
 
 import argparse
+import json
 import os
 from urllib.parse import urljoin
 
 import requests
-import json
 from rich.console import Console
 from rich.pretty import pprint
 from rich.table import Table
@@ -370,7 +370,9 @@ def main():
                 keys = get_resource_keys(api, schema_uri, args.resource)
                 users_uri = get_users_uri(api, root_uri)
                 if args.action == "list":
-                    list_func(api, users_uri, args.resource, args.json, args.output_file)
+                    list_func(
+                        api, users_uri, args.resource, args.json, args.output_file
+                    )
 
                 elif args.action == "retrieve":
                     retrieve_func(api, users_uri, args.pk, args.json)
@@ -392,7 +394,9 @@ def main():
                 keys = get_resource_keys(api, schema_uri, args.resource)
                 postings_uri = get_postings_uri(api, root_uri)
                 if args.action == "list":
-                    list_func(api, postings_uri, args.resource, args.json, args.output_file)
+                    list_func(
+                        api, postings_uri, args.resource, args.json, args.output_file
+                    )
 
                 elif args.action == "retrieve":
                     retrieve_func(api, postings_uri, args.pk, args.json)
