@@ -1,7 +1,9 @@
-import pytest
 import json
 from datetime import datetime, timedelta
-from main import produce_statistics_gigs, produce_statistics_postings, combine_statistics
+
+import pytest
+from main import (combine_statistics, produce_statistics_gigs,
+                  produce_statistics_postings)
 
 
 @pytest.fixture
