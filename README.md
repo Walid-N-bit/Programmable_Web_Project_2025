@@ -41,35 +41,35 @@ Basic command structure:
 ```
 python gig_client.py <host-address> <resource> <action> 
 ```
-This will perform the required operation (action) on the specified resource.\
+This will perform the required operation (action) on the specified resource.
 
 Arguments:
-* `<host-address>` is the host address of the API.\
-* `<resource>` is either of the collection resources avalable: `users`, `postings`, `gigs`.\
-* `<action>` is either of the following actions: `list`, `retrieve`, `create`, `update`, `delete`, `filter`.\
-* `--pk` is needed to specify the primary key value of an isntance resource for `retrieve`, `update`, `delete` actions.\
-* `--json` can be included to print the output in JSON format.\
-* `--ca` is to include CA certificate file.\
+* `<host-address>` is the host address of the API.
+* `<resource>` is either of the collection resources avalable: `users`, `postings`, `gigs`.
+* `<action>` is either of the following actions: `list`, `retrieve`, `create`, `update`, `delete`, `filter`.
+* `--pk` is needed to specify the primary key value of an isntance resource for `retrieve`, `update`, `delete` actions.
+* `--json` can be included to print the output in JSON format.
+* `--ca` is to include CA certificate file.
 
-Example:\
+Example:
 ```
 python gig_client.py http://localhost:8000/ users list
 ```
-This will list all users in a table.\
+This will list all users in a table.
 ```
 python gig_client.py http://localhost:8000/ users list --json
 ```
-This will list all users but in a JSON format.\
+This will list all users but in a JSON format.
 
 ```
 python gig_client.py http://localhost:8000/ users postings retrieve --pk 2
 ```
-This will display posting with id=2.\
+This will display posting with id=2.
 
 When using either `create`, `update`, `filter`, the user will be prompted to input data by field.\
-the action will be perfomed once all required data is inserted.\
+The action will be perfomed once all required data is inserted.\
 In the case of creating new user, a token string will be returned and a .token file created.\
-Example:\
+Example:
 ```
 python gig_client.py http://127.0.0.1:8000/ users create
 ```
