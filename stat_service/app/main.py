@@ -102,6 +102,9 @@ def combine_statistics(gigs_stats, postings_stats):
 
 
 def poll_with_cli_and_build_stats():
+    """
+    Poll the server for gigs and postings data and build statistics.
+    """
     while True:
 
         print("Polling for gigs and postings...")
