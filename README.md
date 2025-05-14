@@ -12,7 +12,7 @@ __Remember to include all required documentation and HOWTOs, including how to cr
 
 For the database model implementations, we decided to use Django.\
 For database itself, SQLite3 was used with version 3.40.1, Django is version 5.1.6\
-For testing just installing Django is enough:\
+For testing just installing Django is enough:
 ```
 python -m venv .testenv
 source .testenv/bin/activate
@@ -34,6 +34,15 @@ To start running the API:
 python manage.py runserver
 ```
 This will start the API at http://localhost:8000/
+
+### Running tests:
+
+Tests can be done using the provided script `testing_and_cov.ps1`.\
+To run a specific test use:
+```
+coverage run --source='.' manage.py test tests.<test-name>
+coverage report -m
+```
 
 ### Using the client:
 
