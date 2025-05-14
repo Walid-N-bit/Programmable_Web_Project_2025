@@ -1,10 +1,11 @@
 """
-This script populates the database with sample data for testing purposes.
+Populate the database with sample data for testing purposes.
 """
 
 import os
 from datetime import datetime, timedelta
 
+# Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django  # pylint: disable=wrong-import-position
 
@@ -18,91 +19,78 @@ def populate_db():
     """
     Populate the database with sample data for testing purposes.
     """
-    # Create necessary datetime objects
-    week_ago = datetime.now().date() - timedelta(days=7)
-    week_ahead = datetime.now().date() + timedelta(days=7)
-    now = datetime.now().date()
+    week_ago = datetime.now() - timedelta(days=7)
+    week_ahead = datetime.now() + timedelta(days=7)
+    now = datetime.now()
 
-    # Create Customers
-    user1 = User.objects.create(
-        first_name="John",
-        last_name="Wick",
-        email="customer1@asd.com",
-        phone_number="1234567890",
-        address="Testitie 12, 90500 Oulu",
-        role="customer",
-    )
-    user2 = User.objects.create(
-        first_name="John",
-        last_name="117",
-        email="customer2@asd.com",
-        phone_number="0987654321",
-        address="Testitie 13, 90520 Oulu",
-        role="customer",
-    )
+    # Create Users (Pop Culture, excluding Star Wars)
+    users = [
+        {"first_name": "Tony", "last_name": "Stark", "email": "tony@stark.com"},
+        {"first_name": "Bruce", "last_name": "Wayne", "email": "bruce@wayne.com"},
+        {"first_name": "Clark", "last_name": "Kent", "email": "clark@kent.com"},
+        {"first_name": "Diana", "last_name": "Prince", "email": "diana@amazon.com"},
+        {"first_name": "Peter", "last_name": "Parker", "email": "peter@dailybugle.com"},
+        {"first_name": "Wanda", "last_name": "Maximoff", "email": "wanda@scarlet.com"},
+    ]
 
-    # Create Employees
-    user3 = User.objects.create(
-        first_name="Edward",
-        last_name="Elric",
-        email="employee1@asd.com",
-        phone_number="1234567890",
-        role="employee",
-    )
-    User.objects.create(
-        first_name="Alphonse",
-        last_name="Elric",
-        email="employee2@asd.com",
-        phone_number="0987654321",
-        role="employee",
-    )
+    user_objs = []
+    for u in users:
+        user = User.objects.create(
+            first_name=u["first_name"],
+            last_name=u["last_name"],
+            email=u["email"],
+            phone_number="0000000000",
+            address="123 Fictional St",
+        )
+        user_objs.append(user)
 
     # Create Postings
-    Posting.objects.create(
-        title="Posting One",
-        description="Hey you, you're finally awake.",
-        user=user1,
+    posting1 = Posting.objects.create(
+        title="Help with yard work",
+        description="Trim bushes, mow lawn, 2-3 hours",
+        owner=user_objs[0],  # Tony Stark
         expires_at=week_ahead,
-        price=100.00,
+        price=120.00,
         status="open",
     )
-    Posting.objects.create(
-        title="Posting Two",
-        description="You were trying to cross the border, right?",
-        user=user2,
-        expires_at=week_ago,  # pylint: disable=duplicate-code
-        price=200.00,
+
+    posting2 = Posting.objects.create(
+        title="Assemble furniture",
+        description="IKEA wardrobe assembly",
+        owner=user_objs[1],  # Bruce Wayne
+        expires_at=week_ago,
+        price=90.00,
         status="expired",
     )
-    Posting.objects.create(
-        title="Posting Three",
-        description="Walked right into that Imperial ambush, same as us, and that thief there.",
-        user=user3,
-        expires_at=week_ahead,
-        price=300.00,
-        status="accepted",
+    
+    posting3 = Posting.objects.create(
+        title="Missing cat",
+        description="help me find my pet",
+        owner=user_objs[5],  
+        expires_at=week_ago,
+        price=50.00,
+        status="open",
     )
+
 
     # Create Gigs
     Gig.objects.create(
-        title="Gig One",
-        description="For the Emperor!",
-        user=user1,
+        owner=user_objs[2],  # Clark Kent
+        posting=posting1,
         start_date=week_ago,
         end_date=now,
-        price=100.00,
         status="completed",
-    )
+    )  # pylint: disable=duplicate-code
+
     Gig.objects.create(
-        title="Gig Two",
-        description="Damn you Stormcloaks. Skyrim was fine until you came along.",
-        user=user2,
+        owner=user_objs[3],  # Diana Prince
+        posting=posting2,
         start_date=week_ago,
         end_date=week_ahead,
-        price=200.00,
         status="in_progress",
     )
 
+    print("Database populated successfully.")
+
 
 populate_db()
-print("Database populated successfully.")

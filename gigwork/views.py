@@ -44,6 +44,9 @@ class JsonSchemaMixin:  # pylint: disable=too-few-public-methods
     """
 
     def json_schema_validation(self, request):
+        """
+        validate request data to make sure it's of correct json type
+        """
         if request.content_type != "application/json":
             raise UnsupportedMediaType(request.content_type)
         try:
@@ -55,6 +58,9 @@ class JsonSchemaMixin:  # pylint: disable=too-few-public-methods
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def api_root(request):
+    """
+    return a json of collection resource URIs and the schema URI
+    """
     return JsonResponse(
         {
             "@controls": {
@@ -90,6 +96,9 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @staticmethod
     def json_schema():
+        """
+        json schema for User model
+        """
         schema = {
             "type": "object",
             "required": ["first_name", "last_name", "email"],
@@ -126,8 +135,8 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def list(self, request):
-        response = super().list(request)
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
         body = MasonBuilder(items=[])
         for user in response.data:
             item = MasonBuilder(user)
@@ -153,8 +162,8 @@ class UserViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None):
-        response = super().retrieve(request, pk=None)
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
         body = MasonBuilder(response.data)
         self_url = reverse("users-detail", kwargs={"pk": response.data["id"]})
 
@@ -211,6 +220,9 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @staticmethod
     def json_schema():
+        """
+        json schema for Posting model
+        """
         schema = {
             "type": "object",
             "required": ["title", "description", "price"],
@@ -232,8 +244,8 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def list(self, request):
-        response = super().list(request)
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
         body = MasonBuilder(items=[])
         for posting in response.data:
             item = MasonBuilder(posting)
@@ -260,8 +272,8 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None):
-        response = super().retrieve(request, pk)
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
         body = MasonBuilder(response.data)
         self_url = reverse("postings-detail", kwargs={"pk": response.data["id"]})
         body.add_control("self", self_url)
@@ -285,7 +297,7 @@ class PostingViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
             {"result": "posting added successfully."}, status=status.HTTP_201_CREATED
         )
 
-    def update(self, request, pk=None, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         self.json_schema_validation(request, *args, **kwargs)
         posting = self.get_object()
         serializer = PostingSerializer(posting, data=request.data)
@@ -314,6 +326,9 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @staticmethod
     def json_schema():
+        """
+        json schema for Gig model
+        """
         schema = {
             "type": "object",
             "required": ["posting"],
@@ -334,7 +349,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
-        response = super().list(request)
+        response = super().list(request, *args, **kwargs)
         body = MasonBuilder(items=[])
         for gig in response.data:
             item = MasonBuilder(gig)
@@ -359,8 +374,8 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
-    def retrieve(self, request, pk=None, *args, **kwargs):
-        response = super().retrieve(request, pk=None)
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
         body = MasonBuilder(response.data)
         self_url = reverse("gigs-detail", kwargs={"pk": response.data["id"]})
         body.add_control("self", self_url)
@@ -382,7 +397,7 @@ class GigViewSet(JsonSchemaMixin, viewsets.ModelViewSet):
         self.perform_create(serializer)
         return JsonResponse({"result": "gig added"}, status=status.HTTP_201_CREATED)
 
-    def update(self, request, pk=None, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         self.json_schema_validation(request, *args, **kwargs)
         gig = self.get_object()
         serializer = GigSerializer(gig, data=request.data)
